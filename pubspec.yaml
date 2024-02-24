@@ -1,0 +1,77 @@
+name: safebox
+description: A new Flutter project.
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+
+dependencies:
+   flutter: 
+    sdk: flutter
+   get:
+   connectivity_plus: 
+   shared_preferences: 
+   cached_network_image: 
+   flutter_svg: 
+   google_sign_in: 
+   pin_code_fields: 
+   smooth_page_indicator: 
+   sms_autofill: 
+   flutter_svg_provider: 
+   dotted_border: 
+   intl: 
+   country_code_picker:
+   dio:
+   intl_phone_field: ^3.2.0
+   fluttertoast: ^8.2.4
+   simple_grouped_listview: ^2.0.0
+   flutter_contacts: ^1.1.7+1
+   file_picker: ^6.1.1
+   files_uploader: ^0.1.1
+   flutter_local_notifications: ^16.3.0
+   equatable: ^2.0.5
+   background_downloader: ^7.6.0
+   path_provider:
+   firebase_core: ^2.25.4
+   firebase_auth:
+   percent_indicator: ^4.2.3
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets: 
+    - assets/
+    - assets/images/
+  fonts: 
+    - family: Roboto
+      fonts: 
+        - asset: assets/fonts/RobotoRegular.ttf
+          weight: 400
+    - family: Sofia Pro
+      fonts: 
+        - asset: assets/fonts/SofiaProSemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/SofiaProMedium.ttf
+          weight: 500
+        - asset: assets/fonts/SofiaPro.ttf
+          weight: 400
+    - family: Open Sans
+      fonts: 
+        - asset: assets/fonts/OpenSansSemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/OpenSansBold.ttf
+          weight: 700
+    - family: SF Pro Text
+      fonts: 
+        - asset: assets/fonts/SFProTextRegular.ttf
+          weight: 400
+        - asset: assets/fonts/SFProTextMedium.ttf
+          weight: 500
+
+

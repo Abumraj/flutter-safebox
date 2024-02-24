@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "217520767118",
+    "project_id": "safebox-2c284",
+    "storage_bucket": "safebox-2c284.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:217520767118:android:1cff225821e4549c3a89df",
+        "android_client_info": {
+          "package_name": "com.example.safebox"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "217520767118-hi246sa6a2sgdj6au6490qj90spv6i5o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.safebox",
+            "certificate_hash": "105c666dc94930cd1c78b074f178315e84eaed4b"
+          }
+        },
+        {
+          "client_id": "217520767118-7j6lbspf2dl9med5gib3losk559se8t9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-iMAegZkROyFvUDNUEWRJxXShFTWNvEU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "217520767118-7j6lbspf2dl9med5gib3losk559se8t9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "217520767118-2vao8aae7gubgmbh1cuvvv5uhdqbv12s.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.safebox"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
