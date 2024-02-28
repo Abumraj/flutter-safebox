@@ -12,7 +12,7 @@ dependencies:
    get:
    connectivity_plus: 
    shared_preferences: 
-   cached_network_image: 
+   cached_network_image: ^3.3.1 
    flutter_svg: 
    google_sign_in: 
    pin_code_fields: 
@@ -36,6 +36,7 @@ dependencies:
    firebase_core: ^2.25.4
    firebase_auth:
    percent_indicator: ^4.2.3
+   photo_manager: ^3.0.0-dev.5
 
 
 dev_dependencies:

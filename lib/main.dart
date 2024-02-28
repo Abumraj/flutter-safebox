@@ -80,27 +80,25 @@ void backgroundHandler() {
 
       notificationService
           .showNotification(
-        result.taskId.hashCode,
-        'Upload Status',
-        title,
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            channelId,
-            "safeBOX",
-            channelDescription: "Backup Notification",
-            enableVibration: !successful,
-            importance: result.status == UploadTaskStatus.failed
-                ? Importance.high
-                : Importance.min,
-          ),
-          iOS: const DarwinNotificationDetails(
-            presentAlert: true,
-          ),
-        ),
-      )
-          .catchError((e, stack) {
-        print('error while showing notification: $e, $stack');
-      });
+            result.taskId.hashCode,
+            'Upload Status',
+            title,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channelId,
+                "safeBOX",
+                channelDescription: "Backup Notification",
+                enableVibration: !successful,
+                importance: result.status == UploadTaskStatus.failed
+                    ? Importance.high
+                    : Importance.min,
+              ),
+              iOS: const DarwinNotificationDetails(
+                presentAlert: true,
+              ),
+            ),
+          )
+          .catchError((e, stack) {});
     });
   });
 }
@@ -151,9 +149,7 @@ void main() async {
   // saveLocal = await SharedPreferences.getInstance();
   bool? isLoggedIn = false;
   await Constants.getUerLoggedInSharedPreference().then((value) {
-    print(value);
     isLoggedIn = value;
-    // print(isLoggedIn);
   });
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -170,15 +166,13 @@ class MyApp extends StatelessWidget {
 
   MyApp({super.key, this.isLoggedIn});
   final AccountController _accountController = Get.put(AccountController());
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: theme,
       translations: AppLocalization(),
-      locale: Get.deviceLocale, //for setting localization strings
+      locale: Get.deviceLocale,
       fallbackLocale: const Locale('en', 'US'),
       title: 'safebox',
       initialBinding: InitialBindings(),
@@ -188,7 +182,6 @@ class MyApp extends StatelessWidget {
           _accountController.refreshProfile();
         }
       },
-      // initialRoute: AppRoutes.initialRoute,
       getPages: AppRoutes.pages,
       home: SplashScreen(isLogin: isLoggedIn.toString()),
     );

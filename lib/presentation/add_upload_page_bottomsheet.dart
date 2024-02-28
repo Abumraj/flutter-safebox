@@ -104,8 +104,9 @@ class AddUploadPageBottomsheet extends StatelessWidget {
           SizedBox(height: 30.v),
           InkWell(
             onTap: () {
-              uploadController.docsUpload(
-                  folderId: folderId, callBack: functionCallBack);
+              uploadController.fetchImages();
+              // uploadController.docsUpload(
+              //     folderId: folderId, callBack: functionCallBack);
             },
             child: Padding(
               padding: EdgeInsets.only(left: 11.h),

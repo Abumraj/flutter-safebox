@@ -269,6 +269,19 @@ class ApiRepositoryImplementation implements ApiRepository {
       );
       return response.data;
     } catch (e) {
+      return 'error'; // return an empty list on exception/error
+    }
+  }
+
+  @override
+  Future postUserImage(data) async {
+    try {
+      final response = await _httpService.postRequest(
+        "/upload",
+        data,
+      );
+      return response.data;
+    } catch (e) {
       print(e);
       return 'error'; // return an empty list on exception/error
     }

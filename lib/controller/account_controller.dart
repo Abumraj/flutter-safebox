@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:safebox/core/apirepository_implementation.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
@@ -5,6 +8,7 @@ import 'package:safebox/models/account_model.dart';
 import 'package:flutter/material.dart';
 import 'package:safebox/presentation/home_page_screen.dart';
 import 'package:safebox/presentation/login_screen.dart';
+import 'package:dio/dio.dart' as dio;
 
 /// A controller class for the AccountScreen.
 ///
@@ -42,11 +46,6 @@ class AccountController extends GetxController {
   Rx<bool> uploadAudio = false.obs;
 
   Rx<bool> uploadWhatsappBackup = false.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-  }
 
   @override
   void onClose() {
@@ -120,9 +119,35 @@ class AccountController extends GetxController {
         Get.off(const HomePageScreen());
       } else {
         ProgressDialogUtils.hideProgressDialog();
-        ProgressDialogUtils.showSuccessToast("An Error Occurred");
+        ProgressDialogUtils.showFailureToast("An Error Occurred");
       }
     });
     update();
+  }
+
+  updateProfilePicture() async {
+    final file = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowCompression: false,
+    );
+
+    if (file != null && file.count > 0) {
+      dio.FormData formData = dio.FormData.fromMap({
+        'user_image':
+            await dio.MultipartFile.fromFile(File(file.files.first.path!).path),
+      });
+
+      _apiRepositoryImplementation.postUserImage(formData).then((value) {
+        if (value == "Image uploaded successfully") {
+          ProgressDialogUtils.hideProgressDialog();
+          ProgressDialogUtils.showSuccessToast(
+              "Profile Image Updated successfully");
+          Get.off(const HomePageScreen());
+        } else {
+          ProgressDialogUtils.hideProgressDialog();
+          ProgressDialogUtils.showFailureToast("An Error Occurred");
+        }
+      });
+    }
   }
 }

@@ -15,6 +15,7 @@ abstract class ApiRepository {
   Future<List<UserfilesItemModel>> getSubFolderFiles(String path);
   Future<dynamic> postUploadFile(dynamic data);
   Future<dynamic> postCreateFolder(dynamic data);
+  Future<dynamic> postUserImage(dynamic data);
   Future<dynamic> postStarFile(dynamic data);
   Future<dynamic> postRenameFolder(dynamic data);
   Future<dynamic> postUpdateProfile(dynamic data);

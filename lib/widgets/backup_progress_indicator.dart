@@ -4,7 +4,7 @@ import 'package:safebox/core/upload_manager.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 
 class BackupProgressindicator extends StatelessWidget {
-   BackupProgressindicator({ required this.controller,super.key});
+  BackupProgressindicator({required this.controller, super.key});
   Uploadanager controller;
   @override
   Widget build(BuildContext context) {
@@ -29,14 +29,15 @@ class BackupProgressindicator extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.only(top: 1.v),
                   child: Text(
-                    controller.progressUpdate.value.toInt() < 100 ?
-                    "msg_backup_in_progress".tr :     "msg_backup_completed".tr,
+                    controller.progressUpdate.value.toInt() < 100
+                        ? "msg_backup_in_progress".tr
+                        : "msg_backup_completed".tr,
                     style: CustomTextStyles.titleSmallOnPrimary,
                   ),
                 ),
                 InkWell(
                   onTap: () {
-                    if (controller.progressUpdate.value.toInt() == 100 ) {
+                    if (controller.progressUpdate.value.toInt() == 100) {
                       controller.resetProgress();
                     }
                   },
@@ -56,13 +57,15 @@ class BackupProgressindicator extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Obx(() => Text(
-                 "${ ProgressDialogUtils.formatFileSize(controller.totalUploadSize *(controller.progressUpdate.value ~/100))}/${ProgressDialogUtils.formatFileSize(controller.totalUploadSize)}",
-                  style: CustomTextStyles.labelMediumOnPrimaryContainer,
-                )),
-                Obx(() => Text(
-                  "${controller.progressUpdate.value.toInt().toString()}%",
-                  style: CustomTextStyles.labelMediumOnPrimaryContainer,
-                ),)
+                      "${ProgressDialogUtils.formatFileSize(controller.totalUploadSize * (controller.progressUpdate.value ~/ 100))}/${ProgressDialogUtils.formatFileSize(controller.totalUploadSize)}",
+                      style: CustomTextStyles.labelMediumOnPrimaryContainer,
+                    )),
+                Obx(
+                  () => Text(
+                    "${controller.progressUpdate.value.toInt().toString()}%",
+                    style: CustomTextStyles.labelMediumOnPrimaryContainer,
+                  ),
+                )
               ],
             ),
           ),
@@ -77,18 +80,18 @@ class BackupProgressindicator extends StatelessWidget {
               ),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(
-                2.h,
-              ),
-              child: Obx(() => LinearProgressIndicator(
-                value: controller.progressUpdate.value,
-                backgroundColor: appTheme.whiteA700,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  appTheme.amberA200,
+                borderRadius: BorderRadius.circular(
+                  2.h,
                 ),
-              ),
-            )
-            ),
+                child: Obx(
+                  () => LinearProgressIndicator(
+                    value: controller.progressUpdate.value,
+                    backgroundColor: Colors.white,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      appTheme.amberA200,
+                    ),
+                  ),
+                )),
           ),
           SizedBox(height: 1.v),
         ],

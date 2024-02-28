@@ -26,11 +26,12 @@ class _StoragePageScreenState extends State<StoragePageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double percentStorage = (ProgressDialogUtils.getSizeComparableValue(
-                accountController.accountModelObj.value.usedStorage) /
-            ProgressDialogUtils.getSizeComparableValue(
-                accountController.accountModelObj.value.totalStorage)) *
-        100;
+    double percentStorage = ((ProgressDialogUtils.getSizeComparableValue(
+                    accountController.accountModelObj.value.usedStorage) /
+                ProgressDialogUtils.getSizeComparableValue(
+                    accountController.accountModelObj.value.totalStorage)) *
+            100)
+        .roundToDouble();
     mediaQueryData = MediaQuery.of(context);
     return SafeArea(
         child: Scaffold(
@@ -57,7 +58,7 @@ class _StoragePageScreenState extends State<StoragePageScreen> {
                                   accountController
                                       .accountModelObj.value.totalStorage),
                           startAngle: 45,
-                          center: Text("${percentStorage.roundToDouble()}%"),
+                          center: Text("$percentStorage%"),
                           progressColor: appTheme.blue800,
                         ),
                         Padding(
