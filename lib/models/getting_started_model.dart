@@ -7,21 +7,23 @@ import 'fileoptions_item_model.dart';
 /// This class defines the variables used in the [getting_started_screen],
 /// and is typically used to hold data that is passed between different parts of the application.
 class GettingStartedModel extends GetxController {
-  final ApiRepositoryImplementation _apiRepositoryImplementation =
-      Get.put(ApiRepositoryImplementation());
-List<FileoptionsItemModel> fileoptionsItemList = [];
+  // final ApiRepositoryImplementation _apiRepositoryImplementation =
+  //     Get.put(ApiRepositoryImplementation());
+  List<FileoptionsItemModel> fileoptionsItemList = [];
+  List<bool> backupOptions = [];
+  Rx<bool> isSelected = false.obs;
 
-  @override
-  void onInit() {
-    productList();
-    super.onInit();
-  }
+  // @override
+  // void onInit() {
+  //   productList();
+  //   super.onInit();
+  // }
 
-  productList() {
-    ProgressDialogUtils.showProgressDialog();
-    _apiRepositoryImplementation.getProductList().then((value) {
-      fileoptionsItemList = value;
-      ProgressDialogUtils.hideProgressDialog();
-    });
-  }
+  // productList() {
+  //   ProgressDialogUtils.showProgressDialog();
+  //   _apiRepositoryImplementation.getProductList().then((value) {
+  //     fileoptionsItemList = value;
+  //     ProgressDialogUtils.hideProgressDialog();
+  //   });
+  // }
 }

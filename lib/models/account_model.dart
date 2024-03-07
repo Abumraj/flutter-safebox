@@ -13,7 +13,12 @@ class UserDetail {
   String? sizeVideo;
   String? sizeAudio;
   String? sizeDocument;
+  String? referralCode;
+  String? bank;
+  String? accountNumber;
+  String? accountName;
   int? audioCount;
+  String? earnings;
   int? videoCount;
   int? photoCount;
   int? documentCount;
@@ -34,6 +39,11 @@ class UserDetail {
     this.photoCount,
     this.sizeAudio,
     this.sizeDocument,
+    this.accountName,
+    this.accountNumber,
+    this.bank,
+    this.earnings,
+    this.referralCode,
     this.sizePhoto,
     this.sizeVideo,
     this.sizeWhatsapp,
@@ -51,8 +61,13 @@ class UserDetail {
       phone: json['phone'],
       usedStorage: json['usedStorage'],
       totalStorage: json['totalStorage'],
+      referralCode: json['referralCode'],
+      bank: json['bank'],
+      accountName: json['accountName'],
+      accountNumber: json['accountNumber'],
       planName: json['planName'],
       audioCount: json['audioCount'],
+      earnings: json['earnings'],
       documentCount: json['documentCount'],
       photoCount: json['photoCount'],
       sizeAudio: json['sizeAudio'],
@@ -76,7 +91,12 @@ class UserDetail {
       'usedStorage': usedStorage,
       'totalStorage': totalStorage,
       'planName': planName,
+      'bank': bank,
+      'accountName': accountName,
+      'accountNumber': accountNumber,
+      'referralCode': referralCode,
       'audioCount': audioCount,
+      'earnings': earnings,
       'documentCount': documentCount,
       'photoCount': photoCount,
       'sizeAudio': sizeAudio,

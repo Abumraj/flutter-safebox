@@ -10,6 +10,20 @@ class CustomTextStyles {
   static get bodyLargeOnPrimaryContainer => theme.textTheme.bodyLarge!.copyWith(
         color: theme.colorScheme.onPrimaryContainer.withOpacity(1),
       );
+  static get bodyMediumBlue200 => theme.textTheme.bodyMedium!.copyWith(
+        color: appTheme.blue200,
+      );
+  static get bodySmallBlue20012 => theme.textTheme.bodySmall!.copyWith(
+        color: appTheme.blue200,
+        fontSize: 12.fSize,
+      );
+  static get titleSmallGray900 => theme.textTheme.titleSmall!.copyWith(
+        color: appTheme.gray900,
+        fontWeight: FontWeight.w600,
+      );
+  static get bodyMediumPrimaryContainer => theme.textTheme.bodyMedium!.copyWith(
+        color: theme.colorScheme.primaryContainer.withOpacity(1),
+      );
   static get bodyLargeOnPrimaryContainer_1 =>
       theme.textTheme.bodyLarge!.copyWith(
         color: theme.colorScheme.onPrimaryContainer.withOpacity(1),

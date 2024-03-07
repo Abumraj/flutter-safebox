@@ -28,15 +28,16 @@ dependencies:
    simple_grouped_listview: ^2.0.0
    flutter_contacts: ^1.1.7+1
    file_picker: ^6.1.1
-   files_uploader: ^0.1.1
    flutter_local_notifications: ^16.3.0
-   equatable: ^2.0.5
    background_downloader: ^7.6.0
    path_provider:
    firebase_core: ^2.25.4
    firebase_auth:
    percent_indicator: ^4.2.3
    photo_manager: ^3.0.0-dev.5
+   flutter_archive: ^6.0.0
+   webview_flutter: ^4.7.0
+   disk_space_update: ^0.0.2
 
 
 dev_dependencies:

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:safebox/controller/upgrade_storage_one_controller.dart';
 import 'package:safebox/core/app_export.dart';
+import 'package:safebox/presentation/home_page_screen.dart';
 import 'package:safebox/widgets/custom_elevated_button.dart';
 
 // ignore: must_be_immutable
 class UpgradeStorageOneBottomsheet extends StatelessWidget {
-  UpgradeStorageOneBottomsheet(
-    this.controller, {
+  const UpgradeStorageOneBottomsheet({
     Key? key,
   }) : super(
           key: key,
         );
 
-  UpgradeStorageOneController controller;
+  // UpgradeStorageOneController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +36,9 @@ class UpgradeStorageOneBottomsheet extends StatelessWidget {
           ),
           SizedBox(height: 34.v),
           CustomElevatedButton(
+            onPressed: () {
+              Get.off(const HomePageScreen());
+            },
             height: 50.v,
             text: "lbl_close".tr,
             buttonStyle: CustomButtonStyles.outlinePrimary,

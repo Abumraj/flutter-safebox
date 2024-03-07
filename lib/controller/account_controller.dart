@@ -18,6 +18,9 @@ class AccountController extends GetxController {
   final ApiRepositoryImplementation _apiRepositoryImplementation =
       Get.put(ApiRepositoryImplementation());
   TextEditingController nameController = TextEditingController();
+  TextEditingController accountNameController = TextEditingController();
+  TextEditingController accountNumberController = TextEditingController();
+  TextEditingController bankController = TextEditingController();
 
   TextEditingController emailController = TextEditingController();
 
@@ -28,6 +31,7 @@ class AccountController extends GetxController {
 
   Rx<UserDetail> accountModelObj = UserDetail().obs;
   Rx<bool> isShowPassword = true.obs;
+  Rx<bool> isRefreshProfile = false.obs;
 
   Rx<bool> isShowPassword1 = true.obs;
 
@@ -56,13 +60,16 @@ class AccountController extends GetxController {
   }
 
   refreshProfile() {
+    // isRefreshProfile.toggle();
     _apiRepositoryImplementation.getUserDetail().then((value) {
       accountModelObj.value = value;
       nameController.text = accountModelObj.value.name.toString();
       emailController.text = accountModelObj.value.email.toString();
       phoneNumberController.text = accountModelObj.value.phone.toString();
-      // print(accountModelObj.value);
+      // isRefreshProfile.toggle();
       update();
+
+      // print(accountModelObj.value);
     });
   }
 
@@ -86,8 +93,10 @@ class AccountController extends GetxController {
 
     var data = {
       'name': nameController.text,
-      'email': emailController.text,
       'phone_number': phoneNumberController.text,
+      'bank': bankController.text,
+      'account_number': accountNumberController.text,
+      'account_name': accountNameController.text,
     };
 
     _apiRepositoryImplementation.postUpdateProfile(data).then((value) {

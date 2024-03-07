@@ -156,6 +156,28 @@ class CreateAccountScreen extends GetWidget<CreateAccountController> {
                         ),
                         SizedBox(height: 6.v),
                         _buildPassword(),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "lbl_password2".tr,
+                                  style: CustomTextStyles
+                                      .labelLargeSofiaProGray500,
+                                ),
+                                TextSpan(
+                                  text: "lbl".tr,
+                                  style:
+                                      CustomTextStyles.labelLargeSofiaProRed500,
+                                ),
+                              ],
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                        SizedBox(height: 6.v),
+                        _buildReferral(),
                         SizedBox(height: 40.v),
                         _buildCreateAccount(),
                         SizedBox(height: 23.v),
@@ -266,6 +288,16 @@ class CreateAccountScreen extends GetWidget<CreateAccountController> {
         }
         return null;
       },
+    );
+  }
+
+  /// Section Widget
+  Widget _buildReferral() {
+    return CustomTextFormField(
+      controller: controller.referralCodeController,
+      hintText: "Referral Code (optional)".tr,
+      hintStyle: CustomTextStyles.titleMediumBlue800,
+      autovalidateMode: AutovalidateMode.disabled,
     );
   }
 

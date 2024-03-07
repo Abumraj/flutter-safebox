@@ -1,26 +1,36 @@
 import 'dart:io';
 import 'package:background_downloader/background_downloader.dart';
+import 'package:disk_space_update/disk_space_update.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_archive/flutter_archive.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:safebox/controller/account_controller.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-String baseUrl = 'http://192.168.43.144:8000/api/file';
+String baseUrl = 'https://safebox.africa/api/file';
 
 class Uploadanager extends GetxController {
+  final AccountController accountController = Get.put(AccountController());
+
   List<AssetEntity> mediaAssets = [];
   Rx<double> progressUpdate = 0.0.obs;
   int totalUploadSize = 0;
+  Rx<int> totalUploadLength = 0.obs;
+  int totalUploadCount = 0;
+  Rx<int> totalProgressSize = 0.obs;
   int totalbatchSize = 1;
+  int chunkSizeUpdate = 0;
   String backUpDateKey = '';
   DateTime? backUpDate;
   String backUpDateString = '';
-
+  String appDir = '';
 // List<DownloadTask> recoveryTask = [];
   static late MultiUploadTask backupTask;
   Rx<bool> isUploadStarted = false.obs;
@@ -28,6 +38,7 @@ class Uploadanager extends GetxController {
   resetProgress() {
     progressUpdate.value = 0.0;
     totalUploadSize = 0;
+    totalProgressSize.value = 0;
   }
 
   Future docsUpload({int? folderId, Function? callBack}) async {
@@ -222,25 +233,6 @@ class Uploadanager extends GetxController {
     }
   }
 
-  // static _handleFileUpload(List<String?> paths, folderId, String token) async {
-  //   await uploadTracker.enqueue(
-  //       _buildUpload(paths.whereType<String>().toList(), folderId, token));
-  // }
-
-  // static Upload _buildUpload(List<String> paths, int? folderId, String token) {
-  //   const tag = 'upload';
-  //   print(paths.length);
-  //   return MultipartFormDataUpload(
-  //     url: baseUrl.toString(),
-  //     data: {'folderId': "12"},
-  //     files: paths.map((e) => FileItem(path: e, field: 'file')).toList(),
-  //     headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
-  //     method: UploadMethod.POST,
-  //     tag: tag,
-  //     allowCellular: true,
-  //   );
-  // }
-
   static backgroundDownloaderSetup() {
     void myNotificationTapCallback(
         Task task, NotificationType notificationType) {
@@ -317,9 +309,11 @@ class Uploadanager extends GetxController {
     totalUploadSize = 0;
     List<Contact> preContact = [];
     extractContact().then((value) {
-      preContact.addAll(value);
-      preContact.addAll(contacts);
+      if (value.isEmpty) {
+        preContact.addAll(value);
+      }
     });
+    preContact.addAll(contacts);
     // List<Contacts> contactToUpload = [];
     List<String> vCardList = [];
 
@@ -343,15 +337,11 @@ class Uploadanager extends GetxController {
     // } else {
   }
 
-  // trckUploadProgress(taskId)async{
-  //   final record = await FileDownloader().database.recordForId(taskId);
-  //    if (record!.status == TaskStatus.running) {
-  //      trackRecord!.value = record;
-  //   // print('-- progress ${record.progress * 100}%');
-  //   // print('-- file size ${record.expectedFileSize} bytes');
-  //   print(trackRecord);
-  // }
-  //  }
+  backUpContact() async {
+    List<Contact> contacts =
+        await FlutterContacts.getContacts(withProperties: true);
+    uploadContact(contacts);
+  }
 
   downloadFile() async {
     try {
@@ -405,8 +395,12 @@ class Uploadanager extends GetxController {
       await FileDownloader().upload(
         task,
         onProgress: (progress) {
-          if (!progress.isNegative && totalbatchSize == 1) {
-            progressUpdate.value = progress * 100;
+          progressUpdate.value = progress * 100;
+
+          if (progressUpdate.value == 100 && totalbatchSize > 1) {
+            if (totalUploadCount > totalUploadLength.value) {
+              totalUploadLength.value += chunkSizeUpdate;
+            }
           }
         },
         onStatus: (status) {
@@ -419,18 +413,17 @@ class Uploadanager extends GetxController {
       );
       // result.
       if (progressUpdate.value == 100 && totalbatchSize == 1) {
+        accountController.refreshProfile();
         ProgressDialogUtils.showSuccessToast("Uploaded successfully");
       }
       if (progressUpdate.value == 100 && totalbatchSize > 1) {
-        int batchSizeTracker = 0;
-        if (batchSizeTracker != totalbatchSize) {
-          batchSizeTracker += batchSizeTracker;
-        }
-        progressUpdate.value = (batchSizeTracker / totalUploadSize) * 100;
-        if (batchSizeTracker == totalUploadSize) {
+        if (totalUploadCount > totalUploadSize ||
+            totalUploadCount == totalUploadSize) {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString(backUpDateKey, backUpDateString);
         }
+        accountController.refreshProfile();
+        ProgressDialogUtils.showSuccessToast("Backed up successfully");
       }
       if (callBack != null) {
         callBack();
@@ -440,44 +433,132 @@ class Uploadanager extends GetxController {
     }
   }
 
-  // _uploadBackupFile(file, token, folderId, productId) async {
-  //   try {
-  //     MultiUploadTask task = MultiUploadTask(
-  //         url: baseUrl,
-  //         files: file,
-  //         // fields: {"parent_id": folderId, "productId": productId},
-  //         updates: Updates.statusAndProgress,
-  //         requiresWiFi: false,
-  //         retries: 5,
-  //         httpRequestMethod: 'POST',
-  //         baseDirectory: BaseDirectory.temporary,
-  //         directory: "",
-  //         headers: {
-  //           'Accept': 'application/json',
-  //           'Authorization': 'Bearer $token'
-  //         });
-  //     backupTask = task;
-  //     await FileDownloader().upload(
-  //       // print(task),
-  //       task,
-  //       onProgress: (value) {
-  //         if (!value.isNegative) {}
-  //       },
-  //       onStatus: (status) {},
-  //     );
+  Future<DirStat> getDirStat(String dirPath) async {
+    var dir = Directory(dirPath);
+    bool exists = await dir.exists();
+    if (!exists) {
+      return DirStat(numberOfFiles: 0, totalSize: 0);
+    }
 
-  //     // result.
-  //   } catch (e) {
-  //     print(e);
-  //   }
-  // }
-
-  backupWhatsapp() {
-    whatsappDatabaseLookup().then((value) {
-      if (value.existsSync()) {
-        // _uploadBackupFile(value, token, folderId, productId);
+    int numberOfFiles = 0;
+    int totalSize = 0;
+    await dir
+        .list(recursive: true, followLinks: false)
+        .forEach((FileSystemEntity entity) async {
+      if (entity is File) {
+        numberOfFiles++;
+        totalSize += entity.lengthSync();
       }
     });
+    print(numberOfFiles);
+    print(totalSize / (1024 * 1024));
+    return DirStat(numberOfFiles: numberOfFiles, totalSize: totalSize);
+  }
+
+  Future<int> getAvailableSpace() async {
+    try {
+      // Get the directory for the external storage (SD card)
+      Directory? externalDir = await getExternalStorageDirectory();
+      if (externalDir != null) {
+        // Get the available space on the external storage
+        FileSystemEntity entity = File('/storage/emulated/0/WhatsApp Business');
+        FileStat stat = await entity.stat();
+        print(stat.size);
+        return stat.size;
+      } else {
+        // External storage directory is not available
+        return -1;
+      }
+    } catch (e) {
+      // Error occurred while getting available space
+      print('Error getting available space: $e');
+      return -1;
+    }
+  }
+
+  backupWhatsapp() async {
+    double diskSpace = 0;
+
+    diskSpace = await DiskSpace.getFreeDiskSpace ?? 0;
+    print(diskSpace);
+    // // FilePicker.platform.getDirectoryPath().then((value) => print(value));
+
+    whatsappDirectoryLookup().then((value) {
+      value.forEach((element) async {
+        DirStat stats = await getDirStat(element.path);
+        String link = element.path;
+
+        List<String> parts = link.split('/');
+        String lastWord = parts.isNotEmpty ? parts.last : '';
+        if (diskSpace > (stats.totalSize / 1024 * 1024)) {
+          await _testZip(element, lastWord).then((value) async {
+            File zip = value;
+            //  _uploadFile(true, "file_picker", filer, token, folderId, 'whatsapp',
+            //       callBack);
+            await Constants.getUserTokenSharedPreference().then(
+              (value) {
+                String token = value.toString();
+
+                _uploadFile(true, "", zip.path, token, '', "whatsapp", null);
+              },
+            );
+          });
+          _deleteZipFile("$appDir/$lastWord.zip");
+        } else {
+          ProgressDialogUtils.showFailureToast(
+              "You don't have enough storage for backup");
+        }
+      });
+    });
+  }
+
+  Future<File> _testZip(storeDir, filename) async {
+    final zipFile = _createZipFile("$filename.zip");
+    print("Writing to zip file: ${zipFile.path}");
+
+    // int onProgressCallCount1 = 0;
+
+    try {
+      await ZipFile.createFromDirectory(
+        sourceDir: storeDir,
+        zipFile: zipFile,
+        recurseSubDirs: true,
+        // includeBaseDirectory: true,
+        onZipping: (fileName, isDirectory, progress) {
+          // ++onProgressCallCount1;
+          print('Zip #1:');
+          print('progress: ${progress.toStringAsFixed(1)}%');
+          print('name: $fileName');
+          print('isDirectory: $isDirectory');
+          return ZipFileOperation.includeItem;
+        },
+      );
+    } on PlatformException catch (e) {
+      print(e);
+    }
+    return zipFile;
+  }
+
+  File _createZipFile(String fileName) {
+    final zipFilePath = "$appDir/$fileName";
+    final zipFile = File(zipFilePath);
+
+    if (zipFile.existsSync()) {
+      print("Deleting existing zip file: ${zipFile.path}");
+      zipFile.deleteSync();
+    }
+    return zipFile;
+  }
+
+  _deleteZipFile(String fileName) {
+    final zipFilePath = "$appDir/$fileName";
+    final zipFile = File(zipFilePath);
+
+    if (zipFile.existsSync()) {
+      print("Deleting existing zip file: ${zipFile.path}");
+      zipFile.deleteSync(recursive: true);
+    }
+    return zipFile;
   }
 
   backupContact() async {
@@ -501,48 +582,63 @@ class Uploadanager extends GetxController {
     }
   }
 
-  Future<File> whatsappDatabaseLookup() async {
-    File? whatsappDatabase;
+  Future<List<Directory>> whatsappDirectoryLookup() async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    appDir = appDocDir.path;
 
-    Directory? externalDir;
-    try {
-      externalDir = await getExternalStorageDirectory();
-    } catch (e) {
-      ProgressDialogUtils.showFailureToast(
-          "Error getting external storage directory");
-      return whatsappDatabase!;
-    }
-
-    String externalPath = externalDir!.path;
-    String whatsappBusinessPathOnHigherAndroidVersion = "$externalPath/";
-    String whatsappPathOnHigherAndroidVersion = "$externalPath/";
-    String whatsappBusinessPathOnLowerAndroidVersion = "$externalPath/";
-    String whatsappPathOnLowerAndroidVersion = "$externalPath/";
+    List<Directory> whatsappDirectory = [];
 
     try {
-      if (File(whatsappBusinessPathOnLowerAndroidVersion).existsSync()) {
-        whatsappDatabase = File(whatsappBusinessPathOnLowerAndroidVersion);
-      } else if (File(whatsappBusinessPathOnHigherAndroidVersion)
-          .existsSync()) {
-        whatsappDatabase = File(whatsappBusinessPathOnHigherAndroidVersion);
-      } else if (File(whatsappPathOnLowerAndroidVersion).existsSync()) {
-        whatsappDatabase = File(whatsappPathOnLowerAndroidVersion);
-      } else if (File(whatsappPathOnHigherAndroidVersion).existsSync()) {
-        whatsappDatabase = File(whatsappPathOnHigherAndroidVersion);
-      } else {
-        ProgressDialogUtils.showFailureToast(
-            "Whatsapp not found. Kindly install Whatsapp to backup chats.");
-        return whatsappDatabase!;
+      String whatsappPathOnLowerAndroidVersion =
+          '/storage/emulated/0/Android/media/com.whatsApp';
+      String whatsappBusinessPathOnLowerAndroidVersion =
+          '/storage/emulated/0/Android/media/com.whatsApp.w4b';
+      String whatsappPathOnHigherAndroidVersion =
+          '/storage/emulated/0/WhatsApp';
+      String whatsappBusinessPathOnHigherAndroidVersion =
+          '/storage/emulated/0/WhatsApp Business';
+
+      // Check for the WhatsApp directory
+
+      // For lower Android versions, check WhatsApp directory first
+      if (Directory(whatsappPathOnLowerAndroidVersion).existsSync() &&
+          Directory(whatsappPathOnLowerAndroidVersion).listSync().isNotEmpty) {
+        whatsappDirectory.add(Directory(whatsappPathOnLowerAndroidVersion));
+      }
+      if (Directory(whatsappBusinessPathOnLowerAndroidVersion).existsSync() &&
+          Directory(whatsappBusinessPathOnLowerAndroidVersion)
+              .listSync()
+              .isNotEmpty) {
+        whatsappDirectory
+            .add(Directory(whatsappBusinessPathOnLowerAndroidVersion));
+      }
+      // For higher Android versions, check WhatsApp Business directory first
+      if (Directory(whatsappBusinessPathOnHigherAndroidVersion).existsSync() &&
+          Directory(whatsappBusinessPathOnHigherAndroidVersion)
+              .listSync()
+              .isNotEmpty) {
+        whatsappDirectory
+            .add(Directory(whatsappBusinessPathOnHigherAndroidVersion));
+      }
+
+      if (Directory(whatsappPathOnHigherAndroidVersion).existsSync() &&
+          Directory(whatsappPathOnHigherAndroidVersion).listSync().isNotEmpty) {
+        whatsappDirectory.add(Directory(whatsappPathOnHigherAndroidVersion));
+      }
+
+      if (whatsappDirectory.isEmpty) {
+        throw Exception('WhatsApp directory not found');
       }
     } catch (e) {
-      ProgressDialogUtils.showFailureToast("Error checking file existence");
-      return whatsappDatabase!;
+      // Handle exceptions
+      print('Error: $e');
+      return [];
     }
 
-    return whatsappDatabase;
+    return whatsappDirectory;
   }
 
-  Future<void> fetchImages() async {
+  Future<void> photosBackUp() async {
     backUpDateKey = 'photo_last_backup_date';
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? lastBackupDateString = prefs.getString('photo_last_backup_date');
@@ -552,7 +648,7 @@ class Uploadanager extends GetxController {
           DateFormat('yyyy-MM-dd HH:mm:ss').parse(lastBackupDateString);
     }
 
-    int imageChunkSize = 50;
+    int imageChunkSize = 10;
     List<String> filePaths = [];
     List<AssetPathEntity> media = await PhotoManager.getAssetPathList(
       type: RequestType.image,
@@ -575,6 +671,7 @@ class Uploadanager extends GetxController {
           filePaths.add(path);
         }
       }
+
       // element.file.then(
       //   (value) => value!.length().then((value) => totalUploadSize += value),
       // );
@@ -592,7 +689,7 @@ class Uploadanager extends GetxController {
       //     // print(filePath.length);
       //   }
       // }
-
+      totalUploadCount = filePaths.length;
       uploadByChunks(filePaths, imageChunkSize, 'photo');
       // for (var i = 0; i < count; i++) {}
     }
@@ -608,10 +705,10 @@ class Uploadanager extends GetxController {
           DateFormat('yyyy-MM-dd HH:mm:ss').parse(lastBackupDateString);
     }
 
-    int imageChunkSize = 50;
+    int imageChunkSize = 10;
     List<String> filePaths = [];
     List<AssetPathEntity> media = await PhotoManager.getAssetPathList(
-      type: RequestType.image,
+      type: RequestType.audio,
       // filterOption: FilterOptionGroup(imageOption: )
     );
     backUpDateString = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
@@ -648,6 +745,7 @@ class Uploadanager extends GetxController {
       //     // print(filePath.length);
       //   }
       // }
+      totalUploadCount = filePaths.length;
 
       uploadByChunks(filePaths, imageChunkSize, 'audio');
       // for (var i = 0; i < count; i++) {}
@@ -664,10 +762,10 @@ class Uploadanager extends GetxController {
           DateFormat('yyyy-MM-dd HH:mm:ss').parse(lastBackupDateString);
     }
 
-    int imageChunkSize = 15;
+    int imageChunkSize = 3;
     List<String> filePaths = [];
     List<AssetPathEntity> media = await PhotoManager.getAssetPathList(
-      type: RequestType.image,
+      type: RequestType.video,
       // filterOption: FilterOptionGroup(imageOption: )
     );
     backUpDateString = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
@@ -706,6 +804,8 @@ class Uploadanager extends GetxController {
       // }
       // backUpDateString =
       //     DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+      totalUploadCount = filePaths.length;
+
       uploadByChunks(filePaths, imageChunkSize, 'video');
       // for (var i = 0; i < count; i++) {}
     }
@@ -724,6 +824,7 @@ class Uploadanager extends GetxController {
                 ? (index * chunkSize + chunkSize)
                 : filePath.length));
     totalbatchSize == chunks.length;
+    chunkSizeUpdate = chunkSize;
     print(totalbatchSize);
     // Iterate over each chunk and upload the files
     for (var chunk in chunks) {
@@ -738,4 +839,63 @@ class Uploadanager extends GetxController {
       );
     }
   }
+
+  void backUpData(bool backupDocs, bool backUpPhotos, bool backUpAudios,
+      bool backUpVideos, bool backUpContacts, bool backUpWhatsappData) async {
+    // Perform backup actions one after the other based on user selected options
+    if (backupDocs) {
+      // Perform backup for documents
+      ProgressDialogUtils.showSuccessToast(" Documents Backup Started");
+      print('Backing up documents...');
+    }
+
+    if (backUpPhotos) {
+      // Perform backup for photos
+      ProgressDialogUtils.showSuccessToast("Photos Backup Started");
+
+      print('Backing up photos...');
+      await photosBackUp();
+    }
+
+    if (backUpContacts) {
+      // Perform backup for contacts
+      ProgressDialogUtils.showSuccessToast("Contacts Backup Started");
+
+      print('Backing up contacts...');
+      await backUpContact();
+    }
+
+    if (backUpAudios) {
+      // Perform backup for audios
+      print('Backing up audios...');
+      ProgressDialogUtils.showSuccessToast("Audios Backup Started");
+
+      await audioBackUp();
+    }
+
+    if (backUpVideos) {
+      ProgressDialogUtils.showSuccessToast("Videos Backup Started");
+
+      // Perform backup for videos
+      print('Backing up videos...');
+      await videosBackUp();
+    }
+
+    if (backUpWhatsappData) {
+      ProgressDialogUtils.showSuccessToast("Whatsapp Backup Started");
+
+      // Perform backup for WhatsApp data
+      print('Backing up WhatsApp data...');
+      await backupWhatsapp();
+    }
+  }
+}
+
+class DirStat {
+  final int numberOfFiles;
+  final int totalSize;
+
+  DirStat({required this.numberOfFiles, required this.totalSize});
+
+  // String get totalSizeString => FileSize.getSize(totalSize);
 }

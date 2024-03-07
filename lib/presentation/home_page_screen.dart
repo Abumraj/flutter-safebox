@@ -25,7 +25,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
   List<Widget> screens = [
     const StarredFolderPage(),
     const AddedFolderOnePage(),
-    StarredFilesPage(),
+    const StarredFilesPage(),
     AccountScreen()
   ];
 

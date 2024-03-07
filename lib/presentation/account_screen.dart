@@ -52,8 +52,15 @@ class AccountScreen extends GetWidget<AccountController> {
                   _buildEmail(),
                   SizedBox(height: 30.v),
                   _buildPhoneNumber(),
-                  SizedBox(height: 150.v),
+                  SizedBox(height: 30.v),
+                  _buildAccountName(),
+                  SizedBox(height: 30.v),
+                  _buildAccountNumber(),
+                  SizedBox(height: 30.v),
+                  _buildBank(),
+                  SizedBox(height: 100.v),
                   _buildSave(),
+                  SizedBox(height: 100.v),
                 ]))));
   }
 
@@ -78,6 +85,36 @@ class AccountScreen extends GetWidget<AccountController> {
         child: CustomTextFormField(
             controller: controller.nameController,
             hintText: "Enter your full name".tr,
+            borderDecoration: TextFormFieldStyleHelper.outlineGrayF,
+            fillColor: appTheme.gray10001));
+  }
+
+  Widget _buildBank() {
+    return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 30.h),
+        child: CustomTextFormField(
+            controller: controller.bankController,
+            hintText: "Enter your Bank Tpye e.g GTB BANK".tr,
+            borderDecoration: TextFormFieldStyleHelper.outlineGrayF,
+            fillColor: appTheme.gray10001));
+  }
+
+  Widget _buildAccountName() {
+    return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 30.h),
+        child: CustomTextFormField(
+            controller: controller.accountNameController,
+            hintText: "Enter your Bank Account name".tr,
+            borderDecoration: TextFormFieldStyleHelper.outlineGrayF,
+            fillColor: appTheme.gray10001));
+  }
+
+  Widget _buildAccountNumber() {
+    return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 30.h),
+        child: CustomTextFormField(
+            controller: controller.accountNumberController,
+            hintText: "Enter your Account Number".tr,
             borderDecoration: TextFormFieldStyleHelper.outlineGrayF,
             fillColor: appTheme.gray10001));
   }

@@ -267,6 +267,7 @@ class PrimaryColors {
   Color get gray5002 => Color(0XFFFBFCFC);
   Color get gray5003 => Color(0XFFF9F9FA);
   Color get gray700 => Color(0XFF616161);
+  Color get gray900 => Color(0XFF616161);
 
   // Grayf
   Color get gray2003f => Color(0X3FE9E9E9);
@@ -330,6 +331,7 @@ class PrimaryColors {
 
   // Yellow
   Color get yellow50 => Color(0XFFFFFAED);
+  // Color get yellow50 => Color(0XFFFFFAED);
 }
 
 PrimaryColors get appTheme => ThemeHelper().themeColor();

@@ -18,6 +18,7 @@ class CreateAccountController extends GetxController {
   final AccountController _accountController = Get.put(AccountController());
 
   TextEditingController fullNameController = TextEditingController();
+  TextEditingController referralCodeController = TextEditingController();
 
   TextEditingController emailController = TextEditingController();
 
@@ -54,6 +55,7 @@ class CreateAccountController extends GetxController {
       'country': selectedCountry.value,
       'password': passwordController.text,
       'password_confirmation': passwordController.text,
+      'referral_code': referralCodeController.text
     };
 
     _apiRepositoryImplementation.postRegister(data).then((value) {

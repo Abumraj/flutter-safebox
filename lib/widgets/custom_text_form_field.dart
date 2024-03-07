@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:safebox/core/app_export.dart';
 
 class CustomTextFormField extends StatelessWidget {
-  CustomTextFormField({
+  const CustomTextFormField({
     Key? key,
     this.alignment,
     this.width,
@@ -24,6 +24,7 @@ class CustomTextFormField extends StatelessWidget {
     this.fillColor,
     this.filled = true,
     this.validator,
+    this.autovalidateMode,
   }) : super(
           key: key,
         );
@@ -31,6 +32,7 @@ class CustomTextFormField extends StatelessWidget {
   final Alignment? alignment;
 
   final double? width;
+  final AutovalidateMode? autovalidateMode;
 
   final TextEditingController? controller;
 
@@ -90,6 +92,8 @@ class CustomTextFormField extends StatelessWidget {
           maxLines: maxLines ?? 1,
           decoration: decoration,
           validator: validator,
+          autovalidateMode:
+              autovalidateMode ?? AutovalidateMode.onUserInteraction,
         ),
       );
   InputDecoration get decoration => InputDecoration(

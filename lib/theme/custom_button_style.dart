@@ -18,6 +18,13 @@ class CustomButtonStyles {
           ),
         ),
       );
+
+  static ButtonStyle get fillPrimary => ElevatedButton.styleFrom(
+        backgroundColor: theme.colorScheme.primary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.h),
+        ),
+      );
   static ButtonStyle get fillBlueBL5 => ElevatedButton.styleFrom(
         backgroundColor: appTheme.blue800,
         shape: RoundedRectangleBorder(

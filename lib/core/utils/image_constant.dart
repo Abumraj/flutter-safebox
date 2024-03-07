@@ -8,8 +8,11 @@ class ImageConstant {
   // onboarding screen Two images
   static String imgGroup101 = '$imagePath/img_group_101.svg';
 
+  static String imgIconParkOutli = '$imagePath/img_icon_park_outli.svg';
+
   // onboarding screen Three images
   static String imgGroup108 = '$imagePath/img_group_108.svg';
+  static String imgGroup9 = '$imagePath/img_group_9.svg';
 
   // Create account images
   static String imgFlagGreenA700 = '$imagePath/img_flag_green_a700.svg';

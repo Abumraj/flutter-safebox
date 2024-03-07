@@ -38,16 +38,16 @@ class LoginController extends GetxController {
       'email': emailEditTextController.text,
       'password': passwordEditTextController.text,
     };
-    _apiRepositoryImplementation.postLogin(data).then((value) {
+    _apiRepositoryImplementation.postLogin(data).then((value) async {
       if (value == "error") {
         ProgressDialogUtils.showFailureToast(
             'An error ocurred. Please check your internet connection');
       }
-      print(value);
+      // print(value);
       if (value['message'] == 'login successful') {
-        Constants.saveUserTokenSharedPreference(value['token']);
-        Constants.saveUserLoggedInSharedPreference(englishLabel.value);
-        // _accountController.refreshProfile();
+        await Constants.saveUserTokenSharedPreference(value['token']);
+        await Constants.saveUserLoggedInSharedPreference(englishLabel.value);
+        _accountController.refreshProfile();
         ProgressDialogUtils.hideProgressDialog();
         if (value['is_verified'] == 0) {
           Get.off(VerifyEmailScreen());

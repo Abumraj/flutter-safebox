@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:safebox/controller/account_controller.dart';
 import 'package:safebox/controller/added_folder_one_controller.dart';
 import 'package:safebox/core/apirepository_implementation.dart';
 import 'package:safebox/core/app_export.dart';
@@ -147,12 +146,13 @@ class _AddedFolderOnePageState extends State<AddedFolderOnePage> {
   @override
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
-
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         key: _globalKey,
         endDrawer: Drawer(
+          // width: MediaQuery.of(context).size.width - 20,
+          // height: MediaQuery.of(context).size.width,
           elevation: 10,
           child: NavigationPageScreen(),
         ),
@@ -311,9 +311,9 @@ class _AddedFolderOnePageState extends State<AddedFolderOnePage> {
               context,
               index,
             ) {
-              return SizedBox(
-                width: 7.h,
-              );
+              return const SizedBox(
+                  // width: 7.h,
+                  );
             },
             itemCount: controller
                 .addedFolderOneModelObj.value.filescolumnItemList.value.length,

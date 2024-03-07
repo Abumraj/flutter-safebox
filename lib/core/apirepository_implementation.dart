@@ -3,6 +3,8 @@ import 'package:safebox/core/api_repository.dart';
 import 'package:safebox/core/service_implementation.dart';
 import 'package:safebox/models/account_model.dart';
 import 'package:safebox/models/fileoptions_item_model.dart';
+import 'package:safebox/models/plan_model.dart';
+import 'package:safebox/models/referred_user_model.dart';
 import 'package:safebox/models/userfiles_item_model.dart';
 import 'abstract.dart';
 
@@ -206,6 +208,18 @@ class ApiRepositoryImplementation implements ApiRepository {
         .toList();
   }
 
+  static List<Plan> parsedPlanList(dynamic responseBody) {
+    final parsed = responseBody.cast<Map<String, dynamic>>();
+    return parsed.map<Plan>((json) => Plan.fromJson(json)).toList();
+  }
+
+  static List<ReeferredUserModel> parsedReferralList(dynamic responseBody) {
+    final parsed = responseBody.cast<Map<String, dynamic>>();
+    return parsed
+        .map<ReeferredUserModel>((json) => ReeferredUserModel.fromJson(json))
+        .toList();
+  }
+
   @override
   Future getDeleteFile(data) async {
     try {
@@ -255,9 +269,29 @@ class ApiRepositoryImplementation implements ApiRepository {
   }
 
   @override
-  Future<UserDetail> getUserPlans() {
-    // TODO: implement getUserPlans
-    throw UnimplementedError();
+  Future<List<Plan>> getUserPlans() async {
+    try {
+      final response = await _httpService.getRequest("/plans");
+      print(response.data);
+      List<Plan> list = parsedPlanList(response.data);
+      return list;
+    } catch (e) {
+      print(e);
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ReeferredUserModel>> getReferredUsers() async {
+    try {
+      final response = await _httpService.getRequest("/referral");
+      print(response.data);
+      List<ReeferredUserModel> list = parsedReferralList(response.data);
+      return list;
+    } catch (e) {
+      print(e);
+      return [];
+    }
   }
 
   @override
@@ -284,6 +318,36 @@ class ApiRepositoryImplementation implements ApiRepository {
     } catch (e) {
       print(e);
       return 'error'; // return an empty list on exception/error
+    }
+  }
+
+  @override
+  Future getAccessCode(int amount, plancode) async {
+    try {
+      final response = await _httpService.postRequest(
+        "/transactionInit",
+        {"amount": amount, "code": plancode},
+      );
+
+      return response.data;
+    } catch (e) {
+      return e; // return an empty list on exception/error
+    }
+  }
+
+  @override
+  Future verifyTransaction(String reference, int subscriptionId) async {
+    try {
+      final response = await _httpService.postRequest(
+        "/transactionVerify",
+        {
+          "reference": reference,
+          "subscriptionId": subscriptionId,
+        },
+      );
+      return response.data;
+    } catch (e) {
+      return e; // return an empty list on exception/error
     }
   }
 

@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:safebox/core/constants/constants.dart';
 import 'abstract.dart';
 
-String baseUrl = 'http://192.168.43.144:8000/api';
+String baseUrl = 'https://safebox.africa/api';
 String token = '';
 bool? isUserLoggedIn = true;
 Dio _dio = Dio();

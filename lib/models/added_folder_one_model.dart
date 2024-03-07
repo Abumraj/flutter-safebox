@@ -41,7 +41,7 @@ class AddedFolderOneModel {
     // Initialize the observables after the controller is ready
     filescolumnItemList.value.forEach((item) {
       if (item.filesText!.value == "Files") {
-        item.filesText!.value =
+        item.itemsText!.value =
             "${accountController.accountModelObj.value.documentCount} items";
       } else if (item.filesText!.value == "Photos") {
         item.itemsText!.value =

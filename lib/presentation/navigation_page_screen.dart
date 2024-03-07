@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:safebox/presentation/data_selection_page_screen.dart';
-import 'package:safebox/presentation/login_screen.dart';
+import 'package:safebox/presentation/referral_overview.dart';
 import 'package:safebox/presentation/settings_screen.dart';
 import 'package:safebox/presentation/storage_page_screen.dart';
 import 'package:safebox/presentation/upgrade_storage_screen.dart';
@@ -19,7 +19,7 @@ class NavigationPageScreen extends GetWidget<AccountController> {
     return SafeArea(
         child: Scaffold(
       body: SizedBox(
-          height: 688.v,
+          height: 700.v,
           width: double.maxFinite,
           child: Stack(alignment: Alignment.bottomCenter, children: [
             Align(
@@ -62,7 +62,7 @@ class NavigationPageScreen extends GetWidget<AccountController> {
                           SizedBox(height: 28.v),
                           InkWell(
                             onTap: () {
-                              Get.to(DataSelectionPageScreen());
+                              Get.to(const DataSelectionPageScreen());
                             },
                             child: Row(children: [
                               CustomImageView(
@@ -85,6 +85,15 @@ class NavigationPageScreen extends GetWidget<AccountController> {
                                 userImage: ImageConstant.imgCiSettingsFilled,
                                 settingsLabel: "lbl_settings".tr),
                           ),
+                          SizedBox(height: 30.v),
+                          InkWell(
+                            onTap: () {
+                              Get.to(const ReferralOverview());
+                            },
+                            child: _buildCiSettingsFilled(
+                                userImage: ImageConstant.imgCiSettingsFilled,
+                                settingsLabel: "Referrals".tr),
+                          ),
                           SizedBox(height: 28.v),
                           Text("msg_need_more_space".tr,
                               style: CustomTextStyles
@@ -96,15 +105,15 @@ class NavigationPageScreen extends GetWidget<AccountController> {
                               text: "lbl_upgrade".tr,
                               buttonStyle: CustomButtonStyles.outlinePrimary,
                               onPressed: () {
-                                Get.to(UpgradeStorageScreen());
+                                Get.to(const UpgradeStorageScreen());
                               },
                               buttonTextStyle: CustomTextStyles
                                   .titleMediumOpenSansWhiteA700),
                           const Spacer(),
-                          SizedBox(height: 41.v),
+                          // SizedBox(height: 41.v),
                           InkWell(
                             onTap: () {
-                              Get.off(LoginScreen());
+                              accountController.logout();
                             },
                             child: Row(children: [
                               CustomImageView(
@@ -135,7 +144,7 @@ class NavigationPageScreen extends GetWidget<AccountController> {
   /// Section Widget
   Widget _buildPolygonThreeRow() {
     return Container(
-        padding: EdgeInsets.only(top: 19.v, bottom: 18.v, left: 16.v),
+        padding: EdgeInsets.only(top: 19.v, bottom: 18.v, left: 12.v),
         decoration: AppDecoration.fillBlue
             .copyWith(borderRadius: BorderRadiusStyle.roundedBorder10),
         child: SizedBox(
@@ -145,13 +154,13 @@ class NavigationPageScreen extends GetWidget<AccountController> {
               padding: const EdgeInsets.only(right: 8.0),
               child: CustomImageView(
                   imagePath: ImageConstant.imgRectangle290,
-                  height: 67.v,
+                  height: 69.v,
                   width: 60.h,
                   radius: BorderRadius.circular(6.h)),
             ),
 
             SizedBox(
-              height: 68.v,
+              height: 70.v,
               width: 215.h,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

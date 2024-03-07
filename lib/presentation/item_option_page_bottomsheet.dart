@@ -66,7 +66,10 @@ class ItemOptionPageBottomsheet extends StatelessWidget {
                           width: 16.adaptSize),
                       Padding(
                           padding: EdgeInsets.only(left: 10.h),
-                          child: Text(  item.isFavourite ==true ? "Unstar"  :"lbl_star".tr,
+                          child: Text(
+                              item.isFavourite == true
+                                  ? "Unstar"
+                                  : "lbl_star".tr,
                               style: theme.textTheme.bodyLarge))
                     ])),
               ),
@@ -194,37 +197,38 @@ class ItemOptionPageBottomsheet extends StatelessWidget {
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        CustomImageView(
-                            imagePath: item.isFolder == 1
-                        ? ImageConstant.imgCarbonFolder : ImageConstant.imgFileGreenA400,
-                            height: 36.adaptSize,
-                            width: 36.adaptSize),
-                        Padding(
-                            padding: EdgeInsets.only(top: 3.v),
-                            child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(title,
-                                      style: theme.textTheme.titleMedium),
-                                  SizedBox(height: 3.v),
-                                  SizedBox(
-                                      width: 100.h,
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Padding(
-                                                padding: EdgeInsets.only(
-                                                    bottom: 1.v),
-                                                child: Text(size,
-                                                    style: theme
-                                                        .textTheme.bodySmall)),
-                                            Text(createdAt,
-                                                style:
-                                                    theme.textTheme.bodySmall)
-                                          ]))
-                                ]))
-                      ])),
+                    CustomImageView(
+                        imagePath: item.isFolder == 1
+                            ? ImageConstant.imgCarbonFolder
+                            : ImageConstant.imgFileGreenA400,
+                        height: 36.adaptSize,
+                        width: 36.adaptSize),
+                    Padding(
+                        padding: EdgeInsets.only(top: 3.v),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                  item.name!.characters.length < 24
+                                      ? item.name.toString()
+                                      : "${item.name.toString().substring(0, 24)}..",
+                                  style: theme.textTheme.titleMedium),
+                              SizedBox(height: 3.v),
+                              SizedBox(
+                                  // width: 100.h,
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                    Padding(
+                                        padding: EdgeInsets.only(bottom: 1.v),
+                                        child: Text(size,
+                                            style: theme.textTheme.bodySmall)),
+                                    Text(createdAt,
+                                        style: theme.textTheme.bodySmall)
+                                  ]))
+                            ]))
+                  ])),
               CustomImageView(
                   imagePath: ImageConstant.imgClose,
                   height: 12.adaptSize,

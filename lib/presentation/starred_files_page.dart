@@ -17,7 +17,7 @@ import 'package:simple_grouped_listview/simple_grouped_listview.dart';
 
 // ignore: must_be_immutable
 class StarredFilesPage extends StatefulWidget {
-  StarredFilesPage({Key? key})
+  const StarredFilesPage({Key? key})
       : super(
           key: key,
         );
@@ -245,9 +245,14 @@ class _StarredFilesPageState extends State<StarredFilesPage> {
         ),
       ),
       actions: [
-        AppbarTrailingImage(
-          imagePath: ImageConstant.imgCiHamburger,
-          margin: EdgeInsets.fromLTRB(26.h, 14.v, 26.h, 11.v),
+        InkWell(
+          onTap: () {
+            _globalKey.currentState!.openEndDrawer();
+          },
+          child: AppbarTrailingImage(
+            imagePath: ImageConstant.imgCiHamburger,
+            margin: EdgeInsets.fromLTRB(26.h, 14.v, 26.h, 11.v),
+          ),
         ),
       ],
     );

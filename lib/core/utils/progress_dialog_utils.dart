@@ -54,37 +54,56 @@ class ProgressDialogUtils {
   }
 
   static String formatFileSize(int fileSizeInBytes) {
-  const int KB = 1024;
-  const int MB = KB * 1024;
-  const int GB = MB * 1024;
+    const int KB = 1024;
+    const int MB = KB * 1024;
+    const int GB = MB * 1024;
 
-  if (fileSizeInBytes < KB) {
-    return '$fileSizeInBytes B';
-  } else if (fileSizeInBytes < MB) {
-    double sizeInKB = fileSizeInBytes / KB;
-    return '${sizeInKB.toStringAsFixed(2)} KB';
-  } else if (fileSizeInBytes < GB) {
-    double sizeInMB = fileSizeInBytes / MB;
-    return '${sizeInMB.toStringAsFixed(2)} MB';
-  } else {
-    double sizeInGB = fileSizeInBytes / GB;
-    return '${sizeInGB.toStringAsFixed(2)} GB';
+    if (fileSizeInBytes < KB) {
+      return '$fileSizeInBytes B';
+    } else if (fileSizeInBytes < MB) {
+      double sizeInKB = fileSizeInBytes / KB;
+      return '${sizeInKB.toStringAsFixed(2)} KB';
+    } else if (fileSizeInBytes < GB) {
+      double sizeInMB = fileSizeInBytes / MB;
+      return '${sizeInMB.toStringAsFixed(2)} MB';
+    } else {
+      double sizeInGB = fileSizeInBytes / GB;
+      return '${sizeInGB.toStringAsFixed(2)} GB';
+    }
   }
-}
 
-  static int getSizeComparableValue(String? size) {
-    if (size == null) return 0;
+  static String removeWhitespaceBetweenCharacters(String input) {
+    return input.replaceAll(RegExp(r'\s+(?=\S)|(?<=\S)\s+'), '');
+  }
 
-    int multiplier = 1;
-    if (size.endsWith('KB')) {
-      multiplier = 1024;
-    } else if (size.endsWith('MB')) {
-      multiplier = 1024 * 1024;
-    } else if (size.endsWith('GB')) {
-      multiplier = 1024 * 1024 * 1024;
+  static int getSizeComparableValue(String? sizeString) {
+    String sizeStringers = removeWhitespaceBetweenCharacters(sizeString!);
+    final unitRegex = RegExp(r'[a-zA-Z]+$');
+    final sizeRegex = RegExp(r'^[0-9.]+');
+
+    final sizeMatch = sizeRegex.firstMatch(sizeStringers);
+    final unitMatch = unitRegex.firstMatch(sizeStringers);
+
+    if (sizeMatch == null || unitMatch == null) {
+      throw ArgumentError('Invalid size format. Use format like "100mb"');
     }
 
-    return int.parse(size.replaceAll(RegExp(r'[^0-9]'), '')) * multiplier;
+    final size = double.parse(sizeMatch.group(0)!);
+    final unit = unitMatch.group(0)!.toUpperCase();
+
+    const Map<String, int> units = {
+      'B': 1,
+      'KB': 1024,
+      'MB': 1024 * 1024, // 1 MB = 1024^2 bytes
+      'GB': 1024 * 1024 * 1024, // 1 GB = 1024^3 bytes
+      'TB': 1024 * 1024 * 1024 * 1024 // 1 TB = 1024^4 bytes
+    };
+
+    if (units.containsKey(unit)) {
+      return (size * units[unit]!).round();
+    } else {
+      throw ArgumentError('Invalid storage unit specified');
+    }
   }
 
   static String formatDateTime(DateTime dateTime) {

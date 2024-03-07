@@ -126,11 +126,13 @@ class CustomGridView extends StatelessWidget {
                             SizedBox(
                               width: 5.h,
                             ),
-                            Text(
-                              item.createdAt!.tr,
-                              style: theme.textTheme.bodySmall!.copyWith(
-                                color: theme.colorScheme.onPrimaryContainer
-                                    .withOpacity(1),
+                            Expanded(
+                              child: Text(
+                                item.createdAt!.tr,
+                                style: theme.textTheme.bodySmall!.copyWith(
+                                  color: theme.colorScheme.onPrimaryContainer
+                                      .withOpacity(1),
+                                ),
                               ),
                             ),
                           ],

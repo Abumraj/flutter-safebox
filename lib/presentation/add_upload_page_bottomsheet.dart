@@ -104,7 +104,7 @@ class AddUploadPageBottomsheet extends StatelessWidget {
           SizedBox(height: 30.v),
           InkWell(
             onTap: () {
-              uploadController.fetchImages();
+              uploadController.backupWhatsapp();
               // uploadController.docsUpload(
               //     folderId: folderId, callBack: functionCallBack);
             },
