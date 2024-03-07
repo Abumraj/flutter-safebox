@@ -20,7 +20,7 @@ class ReeferredUserModel {
       id: json['id'],
       name: json['name'],
       picture: json['picture'],
-      credit: json['credit'], // Uncomment if needed
+      credit: int.parse(json['credit']), // Uncomment if needed
       status: json['status'],
       updatedAt: DateTime.parse(json['updatedAt']),
     );

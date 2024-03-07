@@ -75,16 +75,11 @@ class AccountController extends GetxController {
 
   logout() {
     _apiRepositoryImplementation.getLogout().then((value) {
-      if (value == "Logged out successfully") {
-        Constants.saveUserLoggedInSharedPreference(false);
-        Constants.saveUserTokenSharedPreference('');
-        ProgressDialogUtils.hideProgressDialog();
-        ProgressDialogUtils.showSuccessToast("Logged out successfully");
-        Get.off(LoginScreen());
-      } else {
-        ProgressDialogUtils.hideProgressDialog();
-        ProgressDialogUtils.showSuccessToast("An Error Occurred");
-      }
+      Constants.saveUserLoggedInSharedPreference(false);
+      Constants.saveUserTokenSharedPreference('');
+      ProgressDialogUtils.hideProgressDialog();
+      ProgressDialogUtils.showSuccessToast("Logged out successfully");
+      Get.off(LoginScreen());
     });
   }
 

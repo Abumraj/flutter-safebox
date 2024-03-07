@@ -24,6 +24,7 @@ class NameFolderPageDialog extends StatelessWidget {
 
     return Container(
       width: 315.h,
+      // height: 50,
       padding: EdgeInsets.symmetric(
         horizontal: 20.h,
         vertical: 13.v,

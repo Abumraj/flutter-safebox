@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:safebox/controller/account_controller.dart';
 import 'package:safebox/core/apirepository_implementation.dart';
 import 'package:safebox/core/app_export.dart';
+import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:safebox/models/referred_user_model.dart';
 import 'package:safebox/presentation/referrals.dart';
 import 'package:safebox/widgets/app_bar/appbar_leading_image.dart';
@@ -65,7 +67,7 @@ class _ReferralOverviewState extends State<ReferralOverview> {
                     :
                     // SizedBox(height: 211.v),
                     SizedBox(height: 30.v),
-            if (recentFiles.isEmpty)
+            if (recentFiles.isEmpty && !isLoading)
               Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
@@ -76,8 +78,8 @@ class _ReferralOverviewState extends State<ReferralOverview> {
                   ),
                 ),
               ),
-            if (recentFiles.isEmpty) SizedBox(height: 9.v),
-            if (recentFiles.isEmpty)
+            if (recentFiles.isEmpty && !isLoading) SizedBox(height: 9.v),
+            if (recentFiles.isEmpty && !isLoading)
               Container(
                 width: 294.h,
                 margin: EdgeInsets.symmetric(horizontal: 40.h),
@@ -88,15 +90,15 @@ class _ReferralOverviewState extends State<ReferralOverview> {
                   style: CustomTextStyles.bodySmallBlue800,
                 ),
               ),
-            if (recentFiles.isEmpty) SizedBox(height: 44.v),
-            if (recentFiles.isEmpty)
+            if (recentFiles.isEmpty && !isLoading) SizedBox(height: 44.v),
+            if (recentFiles.isEmpty && !isLoading)
               CustomImageView(
                 imagePath: ImageConstant.imgGroup9,
                 height: 160.v,
                 width: 171.h,
               ),
-            if (recentFiles.isEmpty) SizedBox(height: 16.v),
-            if (recentFiles.isEmpty)
+            if (recentFiles.isEmpty && !isLoading) SizedBox(height: 16.v),
+            if (recentFiles.isEmpty && !isLoading)
               Text(
                 "You have not referred any user".tr,
                 style: CustomTextStyles.bodyMediumBlack90001,
@@ -217,6 +219,25 @@ class _ReferralOverviewState extends State<ReferralOverview> {
                   child: Text(
                     "View Transactions".tr,
                     style: CustomTextStyles.bodyMediumBlue200,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              InkWell(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(
+                          text: accountController
+                              .accountModelObj.value.referralCode
+                              .toString()))
+                      .then((value) =>
+                          ProgressDialogUtils.showSuccessToast("Copied"));
+                },
+                child: Padding(
+                  padding: EdgeInsets.only(left: 10.h),
+                  child: Text(
+                    "Code: ${accountController.accountModelObj.value.referralCode.toString()}"
+                        .tr,
+                    style: theme.textTheme.headlineSmall,
                   ),
                 ),
               ),

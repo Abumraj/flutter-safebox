@@ -78,12 +78,15 @@ class AddUploadPageBottomsheet extends StatelessWidget {
                   InkWell(
                     onTap: () {
                       Get.back();
+
                       Get.dialog(AlertDialog(
-                          content: NameFolderPageDialog(
-                        controller,
-                        folderId: folderId,
-                        functionCallBack: functionCallBack,
-                      )));
+                        backgroundColor: Colors.transparent.withAlpha(3),
+                        content: NameFolderPageDialog(
+                          controller,
+                          folderId: folderId,
+                          functionCallBack: functionCallBack,
+                        ),
+                      ));
 
                       // showDialog(context: context, builder: (context){
                       //   return Al
@@ -104,9 +107,10 @@ class AddUploadPageBottomsheet extends StatelessWidget {
           SizedBox(height: 30.v),
           InkWell(
             onTap: () {
-              uploadController.backupWhatsapp();
-              // uploadController.docsUpload(
-              //     folderId: folderId, callBack: functionCallBack);
+              // uploadController.backupWhatsapp();
+              Get.back();
+              uploadController.docsUpload(
+                  folderId: folderId, callBack: functionCallBack);
             },
             child: Padding(
               padding: EdgeInsets.only(left: 11.h),

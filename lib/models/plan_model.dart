@@ -19,7 +19,7 @@ class Plan {
     return Plan(
       id: json['id'],
       planName: json['planName'],
-      planPrice: json['planPrice'],
+      planPrice: int.parse(json['planPrice']),
       planStorage: json['planStorage'],
       referral: json['referral'] == 'yes',
       planCode: json['planCode'],

@@ -3,6 +3,7 @@ import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/upload_manager.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 
+// ignore: must_be_immutable
 class BackupProgressindicator extends StatelessWidget {
   BackupProgressindicator({required this.controller, super.key});
   Uploadanager controller;
@@ -17,7 +18,8 @@ class BackupProgressindicator extends StatelessWidget {
       decoration: AppDecoration.fillOrange.copyWith(
         borderRadius: BorderRadiusStyle.roundedBorder5,
       ),
-      child: controller.totalbatchSize > 1
+      child: controller.totalbatchSize > 1 ||
+              controller.isPreparingBackUp.value == true
           ? Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -30,15 +32,19 @@ class BackupProgressindicator extends StatelessWidget {
                       Padding(
                         padding: EdgeInsets.only(top: 1.v),
                         child: Text(
-                          controller.progressUpdate.value.toInt() < 100
+                          controller.totalUploadLength.toInt() <
+                                  controller.totalUploadCount
                               ? "msg_backup_in_progress".tr
-                              : "msg_backup_completed".tr,
+                              : controller.isPreparingBackUp.value == true
+                                  ? "Preparing Backup"
+                                  : "msg_backup_completed".tr,
                           style: CustomTextStyles.titleSmallOnPrimary,
                         ),
                       ),
                       InkWell(
                         onTap: () {
-                          if (controller.progressUpdate.value.toInt() == 100) {
+                          if (controller.totalUploadLength.toInt() ==
+                              controller.totalUploadCount) {
                             controller.resetProgress();
                           }
                         },
@@ -57,22 +63,29 @@ class BackupProgressindicator extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Obx(() => Text(
-                            "${ProgressDialogUtils.formatFileSize((controller.totalUploadLength.value.toInt() ~/ controller.totalUploadCount.toInt()) * controller.totalUploadSize)}/${ProgressDialogUtils.formatFileSize(controller.totalUploadSize)}",
-                            style:
-                                CustomTextStyles.labelMediumOnPrimaryContainer,
-                          )),
-                      Obx(() => Text(
-                            "${ProgressDialogUtils.formatFileSize((controller.progressUpdate.value.toInt() ~/ 100) * controller.totalUploadSize)}/${ProgressDialogUtils.formatFileSize(controller.totalUploadSize)}",
-                            style:
-                                CustomTextStyles.labelMediumOnPrimaryContainer,
-                          )),
-                      Obx(
-                        () => Text(
-                          "${(controller.totalUploadLength.value.toInt() ~/ controller.totalUploadCount.toInt()) * 100}%",
-                          style: CustomTextStyles.labelMediumOnPrimaryContainer,
-                        ),
-                      )
+                      controller.isPreparingBackUp.value == true
+                          ? const Text("")
+                          : Obx(() => Text(
+                                "${ProgressDialogUtils.formatFileSize(((controller.totalUploadLength.value.toInt() / controller.totalUploadCount.toInt()) * controller.totalUploadSize).toInt())}/${ProgressDialogUtils.formatFileSize(controller.totalUploadSize)}",
+                                style: CustomTextStyles
+                                    .labelMediumOnPrimaryContainer,
+                              )),
+                      controller.isPreparingBackUp.value == true
+                          ? const Text("")
+                          : Obx(() => Text(
+                                "Backed up ${controller.totalUploadLength.value.toInt()} of ${controller.totalUploadCount} Files",
+                                style: CustomTextStyles
+                                    .labelMediumOnPrimaryContainer,
+                              )),
+                      controller.isPreparingBackUp.value == true
+                          ? const Text("")
+                          : Obx(
+                              () => Text(
+                                "${((controller.totalUploadLength.value.toInt() / controller.totalUploadCount.toInt()) * 100).toInt()}%",
+                                style: CustomTextStyles
+                                    .labelMediumOnPrimaryContainer,
+                              ),
+                            )
                     ],
                   ),
                 ),
@@ -90,16 +103,24 @@ class BackupProgressindicator extends StatelessWidget {
                       borderRadius: BorderRadius.circular(
                         2.h,
                       ),
-                      child: Obx(
-                        () => LinearProgressIndicator(
-                          value: controller.totalUploadLength.value.toInt() /
-                              controller.totalUploadCount.toInt(),
-                          backgroundColor: Colors.white,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            appTheme.amberA200,
-                          ),
-                        ),
-                      )),
+                      child: controller.isPreparingBackUp.value == true
+                          ? LinearProgressIndicator(
+                              backgroundColor: Colors.white,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                appTheme.amberA200,
+                              ),
+                            )
+                          : Obx(
+                              () => LinearProgressIndicator(
+                                value:
+                                    controller.totalUploadLength.value.toInt() /
+                                        controller.totalUploadCount.toInt(),
+                                backgroundColor: Colors.white,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  appTheme.amberA200,
+                                ),
+                              ),
+                            )),
                 ),
                 SizedBox(height: 1.v),
               ],
@@ -144,7 +165,7 @@ class BackupProgressindicator extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Obx(() => Text(
-                            "${ProgressDialogUtils.formatFileSize((controller.progressUpdate.value.toInt() ~/ 100) * controller.totalUploadSize)}/${ProgressDialogUtils.formatFileSize(controller.totalUploadSize)}",
+                            "${ProgressDialogUtils.formatFileSize(((controller.progressUpdate.value.toInt() / 100) * controller.totalUploadSize).toInt())}/${ProgressDialogUtils.formatFileSize(controller.totalUploadSize)}",
                             style:
                                 CustomTextStyles.labelMediumOnPrimaryContainer,
                           )),

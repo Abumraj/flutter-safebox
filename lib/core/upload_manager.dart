@@ -34,6 +34,7 @@ class Uploadanager extends GetxController {
 // List<DownloadTask> recoveryTask = [];
   static late MultiUploadTask backupTask;
   Rx<bool> isUploadStarted = false.obs;
+  Rx<bool> isPreparingBackUp = false.obs;
   Rx<TaskRecord>? trackRecord;
   resetProgress() {
     progressUpdate.value = 0.0;
@@ -477,6 +478,8 @@ class Uploadanager extends GetxController {
   }
 
   backupWhatsapp() async {
+    isPreparingBackUp.value = true;
+
     double diskSpace = 0;
 
     diskSpace = await DiskSpace.getFreeDiskSpace ?? 0;
@@ -497,6 +500,8 @@ class Uploadanager extends GetxController {
             //       callBack);
             await Constants.getUserTokenSharedPreference().then(
               (value) {
+                isPreparingBackUp.value = false;
+
                 String token = value.toString();
 
                 _uploadFile(true, "", zip.path, token, '', "whatsapp", null);
@@ -506,7 +511,7 @@ class Uploadanager extends GetxController {
           _deleteZipFile("$appDir/$lastWord.zip");
         } else {
           ProgressDialogUtils.showFailureToast(
-              "You don't have enough storage for backup");
+              "You don't have enough storage to backup Whatsapp");
         }
       });
     });
@@ -639,6 +644,8 @@ class Uploadanager extends GetxController {
   }
 
   Future<void> photosBackUp() async {
+    isPreparingBackUp.value = true;
+
     backUpDateKey = 'photo_last_backup_date';
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? lastBackupDateString = prefs.getString('photo_last_backup_date');
@@ -649,6 +656,7 @@ class Uploadanager extends GetxController {
     }
 
     int imageChunkSize = 10;
+    totalUploadSize = 0;
     List<String> filePaths = [];
     List<AssetPathEntity> media = await PhotoManager.getAssetPathList(
       type: RequestType.image,
@@ -686,16 +694,20 @@ class Uploadanager extends GetxController {
       //     // });
       //     String path = (await element.file)!.path;
       //     filePaths.add(path);
-      //     // print(filePath.length);
       //   }
       // }
       totalUploadCount = filePaths.length;
-      uploadByChunks(filePaths, imageChunkSize, 'photo');
-      // for (var i = 0; i < count; i++) {}
+      // for (var i = 0
+      //; i < count; i++) {}
     }
+    print(filePaths.length);
+    isPreparingBackUp.value = false;
+
+    uploadByChunks(filePaths, imageChunkSize, 'photo');
   }
 
   Future<void> audioBackUp() async {
+    isPreparingBackUp.value = true;
     backUpDateKey = 'audio_last_backup_date';
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? lastBackupDateString = prefs.getString('audio_last_backup_date');
@@ -706,6 +718,8 @@ class Uploadanager extends GetxController {
     }
 
     int imageChunkSize = 10;
+    totalUploadSize = 0;
+
     List<String> filePaths = [];
     List<AssetPathEntity> media = await PhotoManager.getAssetPathList(
       type: RequestType.audio,
@@ -745,14 +759,20 @@ class Uploadanager extends GetxController {
       //     // print(filePath.length);
       //   }
       // }
-      totalUploadCount = filePaths.length;
 
-      uploadByChunks(filePaths, imageChunkSize, 'audio');
       // for (var i = 0; i < count; i++) {}
     }
+    print(filePaths.length);
+
+    totalUploadCount = filePaths.length;
+    isPreparingBackUp.value = false;
+
+    uploadByChunks(filePaths, imageChunkSize, 'audio');
   }
 
   Future<void> videosBackUp() async {
+    isPreparingBackUp.value = true;
+
     backUpDateKey = 'video_last_backup_date';
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? lastBackupDateString = prefs.getString('video_last_backup_date');
@@ -764,6 +784,8 @@ class Uploadanager extends GetxController {
 
     int imageChunkSize = 3;
     List<String> filePaths = [];
+    totalUploadSize = 0;
+
     List<AssetPathEntity> media = await PhotoManager.getAssetPathList(
       type: RequestType.video,
       // filterOption: FilterOptionGroup(imageOption: )
@@ -804,11 +826,14 @@ class Uploadanager extends GetxController {
       // }
       // backUpDateString =
       //     DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
-      totalUploadCount = filePaths.length;
+      // print(filePaths.length);
 
-      uploadByChunks(filePaths, imageChunkSize, 'video');
       // for (var i = 0; i < count; i++) {}
     }
+    totalUploadCount = filePaths.length;
+    isPreparingBackUp.value = false;
+
+    uploadByChunks(filePaths, imageChunkSize, 'video');
   }
 
   Future<void> uploadByChunks(
@@ -823,9 +848,13 @@ class Uploadanager extends GetxController {
             (index * chunkSize + chunkSize) < filePath.length
                 ? (index * chunkSize + chunkSize)
                 : filePath.length));
-    totalbatchSize == chunks.length;
+    totalbatchSize = chunks.length;
     chunkSizeUpdate = chunkSize;
     print(totalbatchSize);
+    print(totalUploadCount);
+    print(chunkSize);
+
+    // print(chunks.length);
     // Iterate over each chunk and upload the files
     for (var chunk in chunks) {
       Constants.getUserTokenSharedPreference().then(

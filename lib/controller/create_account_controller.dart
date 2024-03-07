@@ -58,9 +58,9 @@ class CreateAccountController extends GetxController {
       'referral_code': referralCodeController.text
     };
 
-    _apiRepositoryImplementation.postRegister(data).then((value) {
+    _apiRepositoryImplementation.postRegister(data).then((value) async {
       if (value['message'] == 'you have successfully registered') {
-        Constants.saveUserTokenSharedPreference(value['token']);
+        await Constants.saveUserTokenSharedPreference(value['token']);
         _accountController.refreshProfile();
 
         ProgressDialogUtils.hideProgressDialog();
