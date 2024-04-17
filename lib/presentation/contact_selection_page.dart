@@ -33,12 +33,16 @@ class CustomContactSelectionScreenState
     setState(() {
       isLoading = true;
     });
-    var data = await FlutterContacts.getContacts(withProperties: true);
+    var data = await uploadController.getContactsFromPrefs();
+    // var data = await FlutterContacts.getContacts();
+
+    contacts = uploadController.convertVcardToContactList(data);
     setState(() {
-      contacts = data.sublist(0, 100);
       isLoading = false;
     });
-    contacts.addAll(data.sublist(101, data.length - 1));
+    // data = await FlutterContacts.getContacts(withProperties: true);
+    // contacts = data;
+    // contacts.addAll(data.sublist(101, data.length - 1));
   }
 
   @override
@@ -60,8 +64,10 @@ class CustomContactSelectionScreenState
                       leading: CircleAvatar(
                         backgroundColor: appTheme.blue800,
                         child: Text(
-                          contact.displayName.characters.first +
-                              contact.displayName.characters.elementAt(1),
+                          contact.displayName.characters.first.toUpperCase() +
+                              contact.displayName.characters
+                                  .elementAt(1)
+                                  .toUpperCase(),
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
@@ -69,7 +75,9 @@ class CustomContactSelectionScreenState
                         contact.displayName,
                         style: theme.textTheme.bodyLarge,
                       ),
-                      subtitle: Text(contact.phones.first.number),
+                      // subtitle: Text(contact.phones.first.number.isNotEmpty
+                      //     ? contact.phones.first.number
+                      //     : ""),
                       trailing: Checkbox(
                         value: isContactSelected,
                         visualDensity: const VisualDensity(
@@ -164,7 +172,7 @@ class CustomContactSelectionScreenState
               Get.back();
             }),
         title: AppbarTitle(
-            text: "${selectedContacts.length} Select Contacts",
+            text: "${selectedContacts.length} Selected Contacts",
             margin: EdgeInsets.only(left: 11.h)),
         actions: [
           TextButton(

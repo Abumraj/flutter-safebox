@@ -8,7 +8,6 @@ export 'package:safebox/core/utils/pref_utils.dart';
 export 'package:safebox/core/utils/size_utils.dart';
 export 'package:safebox/data/models/selectionPopupModel/selection_popup_model.dart';
 export 'package:safebox/localization/app_localization.dart';
-export 'package:safebox/routes/app_routes.dart';
 export 'package:safebox/theme/app_decoration.dart';
 export 'package:safebox/theme/custom_text_style.dart';
 export 'package:safebox/theme/theme_helper.dart';

@@ -1,15 +1,22 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:safebox/core/api_repository.dart';
 import 'package:safebox/core/service_implementation.dart';
 import 'package:safebox/models/account_model.dart';
 import 'package:safebox/models/fileoptions_item_model.dart';
+import 'package:safebox/models/pagination_model.dart';
 import 'package:safebox/models/plan_model.dart';
 import 'package:safebox/models/referred_user_model.dart';
+import 'package:safebox/models/transaction_model.dart';
 import 'package:safebox/models/userfiles_item_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'abstract.dart';
 
 class ApiRepositoryImplementation implements ApiRepository {
   HttpService _httpService = Get.put(ServiceImplementation());
+  var dio = Dio();
 
   ApiRepositoryImplementation() {
     _httpService = Get.put(ServiceImplementation());
@@ -49,13 +56,20 @@ class ApiRepositoryImplementation implements ApiRepository {
   }
 
   @override
-  Future<UserDetail> getUserDetail() async {
+  Future<UserDetail> getUserDetail(bool refresh) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String cacheKey = "userProfile";
     try {
-      final response = await _httpService.getRequest(
-        "/my-detail",
-      );
-      print(response);
-      return UserDetail.fromJson(response.data);
+      if (prefs.containsKey(cacheKey) && !refresh) {
+        final cachedData = prefs.getString(cacheKey)!;
+        return UserDetail.fromJson(jsonDecode(cachedData));
+      } else {
+        final response = await _httpService.getRequest(
+          "/my-detail",
+        );
+        print(response);
+        return UserDetail.fromJson(response.data);
+      }
     } catch (e) {
       print(e);
       return UserDetail(); // return an empty list on exception/error
@@ -161,43 +175,116 @@ class ApiRepositoryImplementation implements ApiRepository {
   }
 
   @override
-  Future<List<UserfilesItemModel>> getAllFiles() async {
+  Future postWithdrawal(data) async {
     try {
-      final response = await _httpService.getRequest("/my-files");
-      // print(response.data);
-      List<UserfilesItemModel> list = parsedFileList(response.data['data']);
-      print(list.length);
-      return list;
+      final response = await _httpService.postRequest(
+        "/withdrawal",
+        data,
+      );
+      return response.data;
     } catch (e) {
       print(e);
-      return [];
+      return 'error'; // return an empty list on exception/error
     }
   }
 
   @override
-  Future<List<UserfilesItemModel>> getSubFolderFiles(path) async {
+  Future postPhoneVerificationRequest(data) async {
+    String termiiUrl = 'https://api.ng.termii.com';
+
+    // try {
+    final response = await dio.post("$termiiUrl/api/sms/otp/send",
+        data: data,
+        options: Options(contentType: 'appliction/json', headers: {}));
+    print(response);
+    return response.data;
+    // } catch (e) {
+    //   print(e);
+    //   return 'error'; // return an empty list on exception/error
+    // }
+  }
+
+  @override
+  Future postConfirmPhoneVerificationcode(data) async {
+    String termiiUrl = 'https://api.ng.termii.com';
+
+    try {
+      final response = await dio.post("$termiiUrl/api/sms/otp/verify",
+          data: data, options: Options(headers: {}));
+      print(response.data);
+      return response.data;
+    } catch (e) {
+      print(e);
+      return 'error'; // return an empty list on exception/error
+    }
+  }
+
+  @override
+  Future<PaginationModel<UserfilesItemModel>> getAllFiles(int page) async {
+    try {
+      final response = await _httpService.getRequest("/my-files?page=$page");
+      List<UserfilesItemModel> list = parsedFileList(response.data['data']);
+      final meta = response.data['meta'];
+      final currentPage = meta['current_page'];
+      final lastPage = meta['last_page'];
+      final hasNextPage = currentPage < lastPage;
+      // final List<UserfilesItemModel> items = response.data['data'];
+      // print(list.length);
+      return PaginationModel<UserfilesItemModel>(
+        items: list,
+        currentPage: currentPage,
+        hasMoreItems: hasNextPage,
+      );
+    } catch (e) {
+      // print(e);
+      throw Exception('Failed to fetch files page: $e');
+    }
+  }
+
+  @override
+  Future<PaginationModel<UserfilesItemModel>> getSubFolderFiles(path) async {
     try {
       final response = await _httpService.getRequest("/my-files/$path");
       List<UserfilesItemModel> list = parsedFileList(response.data['data']);
       print(list.length);
-      return list;
+      final meta = response.data['meta'];
+      final currentPage = meta['current_page'];
+      final lastPage = meta['last_page'];
+      final hasNextPage = currentPage < lastPage;
+      // final List<UserfilesItemModel> items = response.data['data'];
+      // print(list.length);
+      return PaginationModel<UserfilesItemModel>(
+        items: list,
+        currentPage: currentPage,
+        hasMoreItems: hasNextPage,
+      );
     } catch (e) {
       print(e);
-      return [];
+      throw Exception('Failed to fetch files page: $e');
     }
   }
 
   @override
-  Future<List<UserfilesItemModel>> getFilesByType(productId) async {
+  Future<PaginationModel<UserfilesItemModel>> getFilesByType(
+      productId, page) async {
     try {
       final response =
-          await _httpService.getRequest("/files-by-type/$productId");
+          await _httpService.getRequest("/files-by-type/$productId?page=$page");
       List<UserfilesItemModel> list = parsedFileList(response.data['data']);
-      print(list.length);
-      return list;
+      final meta = response.data['meta'];
+      final currentPage = meta['current_page'];
+      final lastPage = meta['last_page'];
+      final hasNextPage = currentPage < lastPage;
+      // final List<UserfilesItemModel> items = response.data['data'];
+      // print(list.length);
+      return PaginationModel<UserfilesItemModel>(
+        items: list,
+        currentPage: currentPage,
+        hasMoreItems: hasNextPage,
+      );
     } catch (e) {
       // print(e);
-      return [];
+      throw Exception('Failed to fetch files page: $e');
     }
   }
 
@@ -211,6 +298,13 @@ class ApiRepositoryImplementation implements ApiRepository {
   static List<Plan> parsedPlanList(dynamic responseBody) {
     final parsed = responseBody.cast<Map<String, dynamic>>();
     return parsed.map<Plan>((json) => Plan.fromJson(json)).toList();
+  }
+
+  static List<TransactionModel> parsedTransactionList(dynamic responseBody) {
+    final parsed = responseBody.cast<Map<String, dynamic>>();
+    return parsed
+        .map<TransactionModel>((json) => TransactionModel.fromJson(json))
+        .toList();
   }
 
   static List<ReeferredUserModel> parsedReferralList(dynamic responseBody) {
@@ -235,36 +329,68 @@ class ApiRepositoryImplementation implements ApiRepository {
   }
 
   @override
-  Future getDownload() {
-    // TODO: implement getDownload
-    throw UnimplementedError();
-  }
-
-  @override
-  Future getRecentFiles() async {
-    int page = 1;
+  Future<String> getDownloadUrl(int id) async {
     try {
-      final response =
-          await _httpService.getRequest("/recent-files?page=$page");
-      if (response.data['links']['next'] != null) {
-        page++;
-      }
-      return response;
+      final response = await _httpService.getRequest("/file/download/$id");
+      print(response.data);
+      return response.data;
     } catch (e) {
-      print(e);
-      return [];
+      throw Exception('Failed to fetch files page: $e');
     }
   }
 
   @override
-  Future<List<UserfilesItemModel>> getStarredFiles() async {
+  Future<String> getUpdatePhoneVerify() async {
+    try {
+      final response = await _httpService.getRequest("/verification-confirmed");
+      print(response.data);
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to fetch files page: $e');
+    }
+  }
+
+  @override
+  Future<PaginationModel<UserfilesItemModel>> getRecentFiles() async {
+    try {
+      final response = await _httpService.getRequest("/recent-files");
+      List<UserfilesItemModel> list = parsedFileList(response.data['data']);
+      final meta = response.data['meta'];
+      final currentPage = meta['current_page'];
+      final lastPage = meta['last_page'];
+      final hasNextPage = currentPage < lastPage;
+      // final List<UserfilesItemModel> items = response.data['data'];
+      // print(list.length);
+      return PaginationModel<UserfilesItemModel>(
+        items: list,
+        currentPage: currentPage,
+        hasMoreItems: hasNextPage,
+      );
+    } catch (e) {
+      print(e);
+      throw Exception('Failed to fetch files page: $e');
+    }
+  }
+
+  @override
+  Future<PaginationModel<UserfilesItemModel>> getStarredFiles() async {
     try {
       final response = await _httpService.getRequest("/my-files?favourites=1");
       List<UserfilesItemModel> list = parsedFileList(response.data['data']);
-      return list;
+      final meta = response.data['meta'];
+      final currentPage = meta['current_page'];
+      final lastPage = meta['last_page'];
+      final hasNextPage = currentPage < lastPage;
+      // final List<UserfilesItemModel> items = response.data['data'];
+      // print(list.length);
+      return PaginationModel<UserfilesItemModel>(
+        items: list,
+        currentPage: currentPage,
+        hasMoreItems: hasNextPage,
+      );
     } catch (e) {
       print(e);
-      return [];
+      throw Exception('Failed to fetch files page: $e');
     }
   }
 
@@ -274,6 +400,19 @@ class ApiRepositoryImplementation implements ApiRepository {
       final response = await _httpService.getRequest("/plans");
       print(response.data);
       List<Plan> list = parsedPlanList(response.data);
+      return list;
+    } catch (e) {
+      print(e);
+      return [];
+    }
+  }
+
+  @override
+  Future<List<TransactionModel>> getTransactionHistory() async {
+    try {
+      final response = await _httpService.getRequest("/transaction-history");
+      print(response.data);
+      List<TransactionModel> list = parsedTransactionList(response.data);
       return list;
     } catch (e) {
       print(e);
@@ -299,6 +438,32 @@ class ApiRepositoryImplementation implements ApiRepository {
     try {
       final response = await _httpService.postRequest(
         "/file/add-to-favourites",
+        data,
+      );
+      return response.data;
+    } catch (e) {
+      return 'error'; // return an empty list on exception/error
+    }
+  }
+
+  @override
+  Future postMoveFileOrFolder(data) async {
+    try {
+      final response = await _httpService.postRequest(
+        "/move",
+        data,
+      );
+      return response.data;
+    } catch (e) {
+      return 'error'; // return an empty list on exception/error
+    }
+  }
+
+  @override
+  Future postCopyFileOrFolder(data) async {
+    try {
+      final response = await _httpService.postRequest(
+        "/copy",
         data,
       );
       return response.data;

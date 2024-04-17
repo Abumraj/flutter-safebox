@@ -2,15 +2,15 @@ import 'package:dio/dio.dart';
 import 'package:safebox/core/constants/constants.dart';
 import 'abstract.dart';
 
-String baseUrl = 'https://safebox.africa/api';
-String token = '';
-bool? isUserLoggedIn = true;
-Dio _dio = Dio();
-
 class ServiceImplementation implements HttpService {
+  String baseUrl = 'https://safebox.africa/api';
+// String baseUrl = 'http://192.168.43.144:8000/api';
+  String token = '';
+  bool? isUserLoggedIn = true;
+  Dio _dio = Dio();
   @override
-  void init() {
-    getAuthCredentials();
+  void init() async {
+    await getAuthCredentials();
     _dio = Dio(BaseOptions(baseUrl: baseUrl, headers: {
       'Accept': 'application/json',
       'Authorization': 'Bearer $token'
@@ -37,13 +37,9 @@ class ServiceImplementation implements HttpService {
     return response;
   }
 
-  Future getAuthCredentials() async {
-    await Constants.getUerLoggedInSharedPreference().then((value) {
-      isUserLoggedIn = value;
-    });
-    await Constants.getUserTokenSharedPreference().then((value) {
-      token = value.toString();
-    });
+  Future<void> getAuthCredentials() async {
+    token = (await Constants.getUserTokenSharedPreference())!;
+    isUserLoggedIn = await Constants.getUerLoggedInSharedPreference();
   }
 
   initializeInterceptors() {

@@ -6,6 +6,7 @@ class FilescolumnItemModel {
     this.userImage,
     this.filesText,
     this.itemsText,
+    this.isActive,
     this.id,
   }) {
     userImage = userImage ?? Rx(ImageConstant.imgMenuBlue800);
@@ -19,6 +20,7 @@ class FilescolumnItemModel {
   Rx<String>? filesText;
 
   Rx<String>? itemsText;
+  Rx<bool>? isActive;
 
   Rx<String>? id;
 }

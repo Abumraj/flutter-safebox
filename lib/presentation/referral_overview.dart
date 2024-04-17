@@ -6,11 +6,13 @@ import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:safebox/models/referred_user_model.dart';
 import 'package:safebox/presentation/referrals.dart';
+import 'package:safebox/presentation/transaction_view.dart';
 import 'package:safebox/widgets/app_bar/appbar_leading_image.dart';
 import 'package:safebox/widgets/app_bar/appbar_title.dart';
 import 'package:safebox/widgets/app_bar/custom_app_bar.dart';
 import 'package:safebox/widgets/custom_elevated_button.dart';
 import 'package:safebox/widgets/referred_user_widget.dart';
+import 'package:safebox/widgets/withdrawal_widget.dart';
 
 class ReferralOverview extends StatefulWidget {
   const ReferralOverview({super.key});
@@ -61,7 +63,7 @@ class _ReferralOverviewState extends State<ReferralOverview> {
             if (recentFiles.isNotEmpty) _buildViewAllFrame(),
             SizedBox(height: 25.v),
             isLoading
-                ? CircularProgressIndicator()
+                ? const CircularProgressIndicator()
                 : recentFiles.isNotEmpty
                     ? _buildUserProfile()
                     :
@@ -213,7 +215,9 @@ class _ReferralOverviewState extends State<ReferralOverview> {
                 margin: EdgeInsets.only(bottom: 1.v),
               ),
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  Get.to(const Transactions());
+                },
                 child: Padding(
                   padding: EdgeInsets.only(left: 10.h),
                   child: Text(
@@ -251,6 +255,13 @@ class _ReferralOverviewState extends State<ReferralOverview> {
   /// Section Widget
   Widget _buildWithdrawButton() {
     return CustomElevatedButton(
+      onPressed: () {
+        Get.dialog(Dialog(
+          child: ReferTwoBottomsheet(
+            controller: accountController,
+          ),
+        ));
+      },
       height: 40.v,
       width: 96.h,
       text: "Withdraw".tr,

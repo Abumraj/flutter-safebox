@@ -67,6 +67,9 @@ class LoginScreen extends GetWidget<LoginController> {
                             style: CustomTextStyles.labelLargeSofiaPro)),
                     SizedBox(height: 6.v),
                     _buildPasswordEditText(),
+                    if (controller.passwordEditTextController.text.isNotEmpty)
+                      passwordValidationWidget(
+                          controller.passwordEditTextController.text),
                     SizedBox(height: 10.v),
                     _buildRememberMeRow(),
                     SizedBox(height: 41.v),
@@ -110,6 +113,7 @@ class LoginScreen extends GetWidget<LoginController> {
         buttonTextStyle: theme.textTheme.titleMedium!,
         onPressed: () {
           onTapLoginButton();
+          // GoogleAuthHelper().verifyPhoneNumber();
         });
   }
 
@@ -180,8 +184,7 @@ class LoginScreen extends GetWidget<LoginController> {
         suffixConstraints: BoxConstraints(maxHeight: 50.v),
         validator: (value) {
           if (value == null || (!isValidPassword(value, isRequired: true))) {
-            return "Password must contain upper case, lower case, digit, special character and no white space"
-                .tr;
+            return "Password must contain at least".tr;
           }
           return null;
         },
@@ -236,5 +239,59 @@ class LoginScreen extends GetWidget<LoginController> {
     }).catchError((onError) {
       ProgressDialogUtils.showFailureToast('An error occurred');
     });
+  }
+
+  passwordValidationWidget(String? value) {
+    if (value == null || (!isValidPassword(value, isRequired: true))) {
+      return Obx(() {
+        return controller.isPasswordEmpty.value == false
+            ? const SizedBox()
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(" - 8 characters",
+                      style: TextStyle(
+                          color: value != null && value.length >= 8
+                              ? Colors.green
+                              : Colors.red)),
+                  Text(" - One uppercase letter",
+                      style: TextStyle(
+                          color:
+                              value != null && value.contains(RegExp(r'[A-Z]'))
+                                  ? Colors.green
+                                  : Colors.red)),
+                  Text(" - One lowercase letter",
+                      style: TextStyle(
+                          color:
+                              value != null && value.contains(RegExp(r'[a-z]'))
+                                  ? Colors.green
+                                  : Colors.red)),
+                  Text(" - One digit",
+                      style: TextStyle(
+                          color:
+                              value != null && value.contains(RegExp(r'[0-9]'))
+                                  ? Colors.green
+                                  : Colors.red)),
+                  Text(" - One special character",
+                      style: TextStyle(
+                          color: value != null &&
+                                  value.contains(
+                                      RegExp(r'[!@#$%^&*(),.?":{}|<>]'))
+                              ? Colors.green
+                              : Colors.red)),
+                  Text(
+                    " - No whitespace",
+                    style: TextStyle(
+                        color: value != null && !value.contains(RegExp(r'\s'))
+                            ? Colors.green
+                            : Colors.red),
+                  )
+                ],
+              );
+      });
+    } else {
+      return const SizedBox();
+    }
   }
 }

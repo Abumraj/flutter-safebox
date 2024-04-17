@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:safebox/core/apirepository_implementation.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/upload_manager.dart';
 import 'package:safebox/models/fileoptions_item_model.dart';
@@ -26,10 +25,10 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
   final Uploadanager uploadController = Get.put(Uploadanager());
 
   List<FileoptionsItemModel> fileoptionsItemList = [
-    FileoptionsItemModel(id: 1, productName: 'Documents'),
-    FileoptionsItemModel(id: 2, productName: 'Photos'),
-    FileoptionsItemModel(id: 3, productName: 'Audios'),
-    FileoptionsItemModel(id: 4, productName: 'Videos'),
+    // FileoptionsItemModel(id: 1, productName: 'Documents'),
+    // FileoptionsItemModel(id: 2, productName: 'Photos'),
+    // FileoptionsItemModel(id: 3, productName: 'Audios'),
+    // FileoptionsItemModel(id: 4, productName: 'Videos'),
     FileoptionsItemModel(id: 5, productName: 'Contacts'),
     FileoptionsItemModel(id: 6, productName: 'Whatsapp'),
   ];
@@ -98,12 +97,13 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                       InkWell(
                         onTap: () {
                           uploadController.backUpData(
-                              backupOptions[0],
-                              backupOptions[1],
-                              backupOptions[2],
-                              backupOptions[3],
-                              backupOptions[4],
-                              backupOptions[5]);
+                            backupOptions[0],
+                            backupOptions[1],
+                            // backupOptions[2],
+                            // backupOptions[3],
+                            // backupOptions[4],
+                            // backupOptions[5]
+                          );
                           Get.to(const HomePageScreen());
                         },
                         child: CustomElevatedButton(
@@ -136,27 +136,47 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
   /// Section Widget
   Widget _buildFileOptions() {
     return Padding(
-      padding: EdgeInsets.only(left: 4.h),
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        separatorBuilder: (
-          context,
-          index,
-        ) {
-          return SizedBox(
-            height: 20.v,
-          );
-        },
-        itemCount: fileoptionsItemList.length,
-        itemBuilder: (context, index) {
-          FileoptionsItemModel model = fileoptionsItemList[index];
-          return FileoptionsItemWidget(
-            model,
-            index: index,
-          );
-        },
-      ),
-    );
+        padding: EdgeInsets.only(left: 4.h),
+        child: Obx(() {
+          return controller.isSelected.value == true
+              ? ListView.separated(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  separatorBuilder: (
+                    context,
+                    index,
+                  ) {
+                    return SizedBox(
+                      height: 20.v,
+                    );
+                  },
+                  itemCount: fileoptionsItemList.length,
+                  itemBuilder: (context, index) {
+                    FileoptionsItemModel model = fileoptionsItemList[index];
+                    return FileoptionsItemWidget(
+                      model,
+                      index: index,
+                    );
+                  })
+              : ListView.separated(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  separatorBuilder: (
+                    context,
+                    index,
+                  ) {
+                    return SizedBox(
+                      height: 20.v,
+                    );
+                  },
+                  itemCount: fileoptionsItemList.length,
+                  itemBuilder: (context, index) {
+                    FileoptionsItemModel model = fileoptionsItemList[index];
+                    return FileoptionsItemWidget(
+                      model,
+                      index: index,
+                    );
+                  });
+        }));
   }
 }

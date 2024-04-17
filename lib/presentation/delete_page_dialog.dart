@@ -1,17 +1,18 @@
-import 'package:safebox/controller/delete_page_controller.dart';
+// import 'package:safebox/controller/delete_page_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/widgets/custom_elevated_button.dart';
 
 class DeletePageDialog extends StatelessWidget {
   DeletePageDialog(
-    this.controller, {
+      // this.controller
+      {
     Key? key,
   }) : super(
           key: key,
         );
 
-  DeletePageController controller;
+  // DeletePageController controller;
 
   @override
   Widget build(BuildContext context) {

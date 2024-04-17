@@ -1,14 +1,14 @@
 // import 'package:safebox/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-  late SharedPreferences saveLocal;
+late SharedPreferences saveLocal;
+
 class Constants {
   static String sharedPreferenceUserLoggedInKey = "false";
   static String sharedPreferenceUserTokenKey = "USERTOKEN";
 
-
   // Initialize SharedPreferences in a constructor or another method
- static Future<void> initializeSharedPreferences() async {
+  static Future<void> initializeSharedPreferences() async {
     saveLocal = await SharedPreferences.getInstance();
     // You can perform additional setup or checks if needed
   }
@@ -31,8 +31,8 @@ class Constants {
     return token;
   }
 
-  static Future<Object?> getUserTokenSharedPreference() async {
+  static Future<String?> getUserTokenSharedPreference() async {
     SharedPreferences saveLocal = await SharedPreferences.getInstance();
-    return saveLocal.get(Constants.sharedPreferenceUserTokenKey);
+    return saveLocal.get(Constants.sharedPreferenceUserTokenKey).toString();
   }
 }

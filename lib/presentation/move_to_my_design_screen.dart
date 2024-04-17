@@ -14,12 +14,12 @@ class MoveToMyDesignScreen extends StatefulWidget {
   final String path;
   final String name;
   final int folderId;
-  const MoveToMyDesignScreen(
-      {Key? key,
-      required this.path,
-      required this.folderId,
-      required this.name})
-      : super(key: key);
+  const MoveToMyDesignScreen({
+    Key? key,
+    required this.path,
+    required this.folderId,
+    required this.name,
+  }) : super(key: key);
 
   @override
   State<MoveToMyDesignScreen> createState() => _MoveToMyDesignScreenState();
@@ -28,13 +28,17 @@ class MoveToMyDesignScreen extends StatefulWidget {
 class _MoveToMyDesignScreenState extends State<MoveToMyDesignScreen> {
   final ApiRepositoryImplementation _apiRepositoryImplementation =
       Get.put(ApiRepositoryImplementation());
+
   List<UserfilesItemModel> recentFiles = [];
   bool isLoading = false;
-
+  final ScrollController _scrollController = ScrollController();
+  int page = 1;
+  bool hasMore = false;
   @override
   void initState() {
     recentFilesCall();
     super.initState();
+    _scrollController.addListener(_onScroll);
   }
 
   void recentFilesCall() {
@@ -43,18 +47,66 @@ class _MoveToMyDesignScreenState extends State<MoveToMyDesignScreen> {
     });
     _apiRepositoryImplementation.getSubFolderFiles(widget.path).then((value) {
       setState(() {
-        recentFiles = value;
+        recentFiles = value.items;
+        hasMore = value.hasMoreItems;
+        page = value.currentPage; // Assign the new list directly
         isLoading = false;
+        print(hasMore);
+        // print(allFiles.length); // Assign the new list directly
       });
     });
   }
 
   void recentFilesCallBack() {
-    _apiRepositoryImplementation.getSubFolderFiles(widget.path).then((value) {
+    _apiRepositoryImplementation
+        .getSubFolderFiles(
+      widget.path,
+    )
+        .then((value) {
       setState(() {
-        recentFiles = value;
+        recentFiles = value.items;
+        hasMore = value.hasMoreItems;
+        page = value.currentPage; // Assign the new list directly
+        isLoading = false;
+        print(hasMore);
+        // print(allFiles.length); // Assign the new list directly
       });
     });
+  }
+
+  Future<void> _loadMoreItems() async {
+    if (!isLoading && hasMore) {
+      _apiRepositoryImplementation.getAllFiles(page + 1).then((value) {
+        setState(() {
+          recentFiles.addAll(value.items);
+          hasMore = value.hasMoreItems;
+          page = value.currentPage;
+        });
+      });
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      print("loadmore");
+      _loadMoreItems();
+    }
+  }
+
+  Widget _buildLoadingIndicator() {
+    return const Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Center(
+        child: CircularProgressIndicator.adaptive(
+          strokeWidth: 4,
+          valueColor: AlwaysStoppedAnimation<Color>(
+            Colors.blue,
+            // Colors.white,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -94,6 +146,9 @@ class _MoveToMyDesignScreenState extends State<MoveToMyDesignScreen> {
                               crossAxisCount: 2),
                       itemBuilder: (context, index) {
                         UserfilesItemModel item = recentFiles[index];
+                        if (index == recentFiles.length - 1 && hasMore) {
+                          return _buildLoadingIndicator();
+                        }
                         return CustomGridView(
                           item: item,
                           reloadResource: recentFilesCallBack,
@@ -137,42 +192,20 @@ class _MoveToMyDesignScreenState extends State<MoveToMyDesignScreen> {
   }
 
   /// Section Widget
-  Widget _buildMove() {
+  Widget _buildCopy() {
     return SizedBox(
         height: 82.v,
         width: double.maxFinite,
         child: Stack(alignment: Alignment.center, children: [
           Align(
               alignment: Alignment.center,
-              child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                        padding: EdgeInsets.only(left: 28.h),
-                        child: Row(children: [
-                          CustomImageView(
-                              imagePath: ImageConstant.imgCarbonFolderGray40001,
-                              height: 36.adaptSize,
-                              width: 36.adaptSize),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 10.h, top: 8.v, bottom: 7.v),
-                              child: Text("lbl_pictures".tr,
-                                  style: CustomTextStyles
-                                      .titleLargeSofiaProOnPrimaryMedium))
-                        ])),
-                    SizedBox(height: 19.v),
-                    Divider(color: appTheme.gray200)
-                  ])),
-          Align(
-              alignment: Alignment.center,
               child: Container(
                   width: double.maxFinite,
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 38.h, vertical: 23.v),
-                  decoration: AppDecoration.outlinePrimary.copyWith(
-                      borderRadius: BorderRadiusStyle.customBorderTL30),
+                  padding: EdgeInsets.only(
+                    right: 12.h,
+                  ),
+                  // decoration: AppDecoration.outlinePrimary.copyWith(
+                  //     borderRadius: BorderRadiusStyle.customBorderTL30),
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,7 +217,7 @@ class _MoveToMyDesignScreenState extends State<MoveToMyDesignScreen> {
                         CustomElevatedButton(
                             height: 35.v,
                             width: 99.h,
-                            text: "lbl_move".tr,
+                            text: "lbl_copy".tr,
                             margin: EdgeInsets.only(left: 20.h, top: 1.v),
                             buttonTextStyle:
                                 CustomTextStyles.titleMediumWhiteA700)

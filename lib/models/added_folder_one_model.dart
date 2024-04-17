@@ -3,7 +3,6 @@ import '../../../core/app_export.dart';
 import 'filescolumn_item_model.dart';
 import 'mydesigns_item_model.dart';
 import 'userfile_item_model.dart';
-import 'fileinfo_item_model.dart';
 
 /// This class defines the variables used in the [added_folder_one_page],
 /// and is typically used to hold data that is passed between different parts of the application.
@@ -12,29 +11,35 @@ class AddedFolderOneModel {
 
   Rx<List<FilescolumnItemModel>> filescolumnItemList = Rx([
     FilescolumnItemModel(
-        userImage: ImageConstant.imgMenuBlue800.obs,
-        filesText: "Files".obs,
-        itemsText: "0 items".obs),
-    FilescolumnItemModel(
-        userImage: ImageConstant.imgIcBaselineInsertPhoto.obs,
-        filesText: "Photos".obs,
-        itemsText: "0 items".obs),
-    FilescolumnItemModel(
-        userImage: ImageConstant.imgVideoCamera.obs,
-        filesText: "Videos".obs,
-        itemsText: "0 item".obs),
-    FilescolumnItemModel(
-        userImage: ImageConstant.imgAntDesignAudioFilledPurple400.obs,
-        filesText: "Audios".obs,
-        itemsText: "0 item".obs),
-    FilescolumnItemModel(
         userImage: ImageConstant.imgUser.obs,
         filesText: "Contacts".obs,
+        isActive: true.obs,
         itemsText: "0 item".obs),
     FilescolumnItemModel(
         userImage: ImageConstant.imgRiWhatsappFill.obs,
         filesText: "Whatsapp".obs,
-        itemsText: "1 item".obs)
+        isActive: true.obs,
+        itemsText: "1 item".obs),
+    FilescolumnItemModel(
+        userImage: ImageConstant.imgMenuBlue800.obs,
+        filesText: "Files".obs,
+        isActive: false.obs,
+        itemsText: "0 items".obs),
+    FilescolumnItemModel(
+        userImage: ImageConstant.imgIcBaselineInsertPhoto.obs,
+        filesText: "Photos".obs,
+        isActive: false.obs,
+        itemsText: "0 items".obs),
+    FilescolumnItemModel(
+        userImage: ImageConstant.imgVideoCamera.obs,
+        filesText: "Videos".obs,
+        isActive: false.obs,
+        itemsText: "0 item".obs),
+    FilescolumnItemModel(
+        userImage: ImageConstant.imgAntDesignAudioFilledPurple400.obs,
+        filesText: "Audios".obs,
+        isActive: false.obs,
+        itemsText: "0 item".obs),
   ]);
 
   AddedFolderOneModel() {
@@ -91,11 +96,5 @@ class AddedFolderOneModel {
         fileTime: "2:10 pm".obs)
   ]);
 
-  Rx<List<FileinfoItemModel>> fileinfoItemList = Rx([
-    FileinfoItemModel(
-        fileImage: ImageConstant.imgFileGreenA400.obs,
-        fileName: "stickers.db.crypt12".obs,
-        fileSize: "49.57MB".obs,
-        fileTime: "12:00 am".obs)
-  ]);
+  get fileinfoItemList => null;
 }

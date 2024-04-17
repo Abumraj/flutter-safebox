@@ -1,5 +1,6 @@
+import 'package:safebox/models/fileinfo_item_model.dart';
+
 import '../controller/added_folder_one_controller.dart';
-import '../models/fileinfo_item_model.dart';
 import 'package:flutter/material.dart';
 import 'package:safebox/core/app_export.dart';
 
@@ -67,7 +68,7 @@ class FileinfoItemWidget extends StatelessWidget {
             ],
           ),
         ),
-        Spacer(),
+        const Spacer(),
         CustomImageView(
           imagePath: ImageConstant.imgInfo,
           height: 31.v,

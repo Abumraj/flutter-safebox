@@ -84,7 +84,7 @@ class CustomSearchView extends StatelessWidget {
           controller: controller,
           focusNode: focusNode ?? FocusNode(),
           autofocus: autofocus!,
-          style: textStyle ?? CustomTextStyles.titleMediumGray40001,
+          style: textStyle ?? CustomTextStyles.bodyMediumBlue800,
           keyboardType: textInputType,
           maxLines: maxLines ?? 1,
           decoration: decoration,
@@ -101,10 +101,10 @@ class CustomSearchView extends StatelessWidget {
           padding: EdgeInsets.all(
             15.h,
           ),
-          child: Icon(
-            Icons.search,
-            color: Colors.grey.shade600,
-          ),
+          // child: Icon(
+          //   Icons.search,
+          //   color: Colors.grey.shade600,
+          // ),
         ),
         prefixIconConstraints: prefixConstraints ??
             BoxConstraints(

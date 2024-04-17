@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:safebox/controller/starred_folder_controller.dart';
 import 'package:safebox/core/app_export.dart';
-import 'package:safebox/core/utils/validation_functions.dart';
+import 'package:safebox/presentation/upgrade_storage_screen.dart';
 import 'package:safebox/widgets/custom_elevated_button.dart';
 import 'package:safebox/widgets/custom_text_form_field.dart';
 
-class CopyPageOneDialog extends StatelessWidget {
-  CopyPageOneDialog({
+// ignore: must_be_immutable
+class UpgradePlanDialog extends StatelessWidget {
+  const UpgradePlanDialog({
     Key? key,
   }) : super(
           key: key,
@@ -17,6 +19,7 @@ class CopyPageOneDialog extends StatelessWidget {
 
     return Container(
       width: 315.h,
+      // height: 50,
       padding: EdgeInsets.symmetric(
         horizontal: 20.h,
         vertical: 13.v,
@@ -29,47 +32,40 @@ class CopyPageOneDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "lbl_new_folder".tr,
+            "Out of Storage",
             style: CustomTextStyles.labelLargeOnPrimaryContainer,
           ),
-          SizedBox(height: 14.v),
-          CustomTextFormField(
-            // controller: controller.nameController,
-            hintText: "lbl_folder_name".tr,
-            textInputAction: TextInputAction.done,
-            validator: (value) {
-              if (!isText(value)) {
-                return "err_msg_please_enter_valid_text".tr;
-              }
-              return null;
-            },
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 15.h,
-              vertical: 10.v,
-            ),
-          ),
           SizedBox(height: 20.v),
+          Text("msg_need_more_space".tr,
+              style: CustomTextStyles.labelLargeSofiaProBlue800),
           Align(
             alignment: Alignment.centerRight,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: 8.v,
-                    bottom: 9.v,
-                  ),
-                  child: Text(
-                    "lbl_cancel".tr,
-                    style: CustomTextStyles.labelLargeSofiaProBlue800,
+                InkWell(
+                  onTap: () => Get.back(),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: 8.v,
+                      bottom: 9.v,
+                    ),
+                    child: Text(
+                      "lbl_cancel".tr,
+                      style: CustomTextStyles.labelLargeSofiaProBlue800,
+                    ),
                   ),
                 ),
                 CustomElevatedButton(
-                  height: 30.v,
-                  width: 74.h,
-                  text: "lbl_create".tr,
-                  margin: EdgeInsets.only(left: 15.h),
-                ),
+                    height: 40.v,
+                    width: 129.h,
+                    text: "lbl_upgrade".tr,
+                    buttonStyle: CustomButtonStyles.outlinePrimary,
+                    onPressed: () {
+                      Get.to(const UpgradeStorageScreen());
+                    },
+                    buttonTextStyle:
+                        CustomTextStyles.titleMediumOpenSansWhiteA700),
               ],
             ),
           ),

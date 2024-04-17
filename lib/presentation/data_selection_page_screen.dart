@@ -23,20 +23,22 @@ class _DataSelectionPageScreenState extends State<DataSelectionPageScreen> {
   GettingStartedModel controller = Get.put(GettingStartedModel());
 
   List<FileoptionsItemModel> fileoptionsItemList = [
-    FileoptionsItemModel(id: 1, productName: 'Documents'),
-    FileoptionsItemModel(id: 2, productName: 'Photos'),
-    FileoptionsItemModel(id: 3, productName: 'Audios'),
-    FileoptionsItemModel(id: 4, productName: 'Videos'),
+    // FileoptionsItemModel(id: 1, productName: 'Documents'),
+    // FileoptionsItemModel(id: 2, productName: 'Photos'),
+    // FileoptionsItemModel(id: 3, productName: 'Audios'),
+    // FileoptionsItemModel(id: 4, productName: 'Videos'),
     FileoptionsItemModel(id: 5, productName: 'Contacts'),
     FileoptionsItemModel(id: 6, productName: 'Whatsapp'),
   ];
   bool isLoading = false;
   List<bool> backupOptions = [];
+  int selectedIndex = 0;
 
   @override
   void initState() {
     backupOptions = [];
     // productList();
+
     fileoptionsItemList.forEach((element) {
       controller.backupOptions.add(false);
     });
@@ -64,11 +66,12 @@ class _DataSelectionPageScreenState extends State<DataSelectionPageScreen> {
                         onPressed: () {
                           uploadController.backUpData(
                               controller.backupOptions[0],
-                              controller.backupOptions[1],
-                              controller.backupOptions[2],
-                              controller.backupOptions[3],
-                              controller.backupOptions[4],
-                              controller.backupOptions[5]);
+                              controller.backupOptions[1]
+                              // controller.backupOptions[2],
+                              // controller.backupOptions[3],
+                              // controller.backupOptions[4],
+                              // controller.backupOptions[5]
+                              );
                           onTapArrowLeft();
                         },
                         height: 50.v,
@@ -109,44 +112,48 @@ class _DataSelectionPageScreenState extends State<DataSelectionPageScreen> {
 
   Widget _buildFileOptions() {
     return Padding(
-      padding: EdgeInsets.only(left: 4.h),
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        separatorBuilder: (
-          context,
-          index,
-        ) {
-          return SizedBox(
-            height: 20.v,
-          );
-        },
-        itemCount: fileoptionsItemList.length,
-        itemBuilder: (context, index) {
-          FileoptionsItemModel model = fileoptionsItemList[index];
-          return InkWell(
-            onTap: () {
-              if (model.checkmarkImage == true) {
-                setState(() {
-                  model.checkmarkImage == false;
-                  backupOptions[index] = false;
-                });
-              } else {
-                setState(() {
-                  model.checkmarkImage == true;
-                  backupOptions[index] = true;
-                });
-              }
-              // controller.update();
-            },
-            child: FileoptionsItemWidget(
-              model,
-              index: index,
-            ),
-          );
-        },
-      ),
-    );
+        padding: EdgeInsets.only(left: 4.h),
+        child: Obx(() {
+          return controller.isSelected.value == true
+              ? ListView.separated(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  separatorBuilder: (
+                    context,
+                    index,
+                  ) {
+                    return SizedBox(
+                      height: 20.v,
+                    );
+                  },
+                  itemCount: fileoptionsItemList.length,
+                  itemBuilder: (context, index) {
+                    FileoptionsItemModel model = fileoptionsItemList[index];
+                    return FileoptionsItemWidget(
+                      model,
+                      index: index,
+                    );
+                  })
+              : ListView.separated(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  separatorBuilder: (
+                    context,
+                    index,
+                  ) {
+                    return SizedBox(
+                      height: 20.v,
+                    );
+                  },
+                  itemCount: fileoptionsItemList.length,
+                  itemBuilder: (context, index) {
+                    FileoptionsItemModel model = fileoptionsItemList[index];
+                    return FileoptionsItemWidget(
+                      model,
+                      index: index,
+                    );
+                  });
+        }));
   }
 
   /// Section Widget

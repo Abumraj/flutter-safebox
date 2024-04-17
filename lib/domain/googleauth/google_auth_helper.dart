@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:safebox/core/app_export.dart';
 
 class GoogleAuthHelper {
   FirebaseAuth auth = FirebaseAuth.instance;
@@ -30,14 +31,14 @@ class GoogleAuthHelper {
   }
 
   verifyPhoneNumber() async {
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: '+2349025265463',
-      verificationCompleted: (PhoneAuthCredential credential) {},
-      verificationFailed: (FirebaseAuthException e) {
-        print(e);
-      },
-      codeSent: (String verificationId, int? resendToken) {},
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
+    await FirebaseAuth.instance
+        .verifyPhoneNumber(
+          phoneNumber: '+2349025265463',
+          verificationCompleted: (PhoneAuthCredential credential) {},
+          verificationFailed: (FirebaseAuthException e) {},
+          codeSent: (String verificationId, int? resendToken) {},
+          codeAutoRetrievalTimeout: (String verificationId) {},
+        )
+        .onError((error, stackTrace) => print("error ${error}"));
   }
 }

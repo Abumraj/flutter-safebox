@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:safebox/controller/item_option_page_controller.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/models/userfiles_item_model.dart';
+import 'package:safebox/presentation/copy_to_my_design_screen.dart';
 import 'package:safebox/presentation/information_bottomsheet.dart';
 import 'package:safebox/presentation/rename_folder_dialog.dart';
 
@@ -79,6 +80,7 @@ class ItemOptionPageBottomsheet extends StatelessWidget {
                   Get.back();
                   controller.renameController.text = item.name!;
                   Get.dialog(AlertDialog(
+                    backgroundColor: Colors.transparent.withAlpha(3),
                     content: RenameFolderDialog(
                       folderId: item.id!,
                       folderName: item.name.toString(),
@@ -98,6 +100,8 @@ class ItemOptionPageBottomsheet extends StatelessWidget {
                           Get.back();
                           controller.renameController.text = item.name!;
                           Get.dialog(AlertDialog(
+                            backgroundColor: Colors.transparent,
+                            surfaceTintColor: Colors.transparent,
                             content: RenameFolderDialog(
                               folderId: item.id!,
                               folderName: item.name.toString(),
@@ -112,25 +116,34 @@ class ItemOptionPageBottomsheet extends StatelessWidget {
                       )
                     ])),
               ),
+              if (item.isFolder != 1) SizedBox(height: 29.v),
+              if (item.isFolder != 1)
+                InkWell(
+                  onTap: () {
+                    Get.back();
+                    controller.restore(item.id!, item.name!);
+                  },
+                  child: Padding(
+                      padding: EdgeInsets.only(left: 1.h),
+                      child: Row(children: [
+                        CustomImageView(
+                            imagePath: ImageConstant.imgIcRoundRestorePage,
+                            height: 16.adaptSize,
+                            width: 16.adaptSize),
+                        Padding(
+                            padding: EdgeInsets.only(left: 10.h),
+                            child: Text("msg_restore_to_device".tr,
+                                style: theme.textTheme.bodyLarge))
+                      ])),
+                ),
               SizedBox(height: 29.v),
               InkWell(
-                onTap: () {},
-                child: Padding(
-                    padding: EdgeInsets.only(left: 1.h),
-                    child: Row(children: [
-                      CustomImageView(
-                          imagePath: ImageConstant.imgIcRoundRestorePage,
-                          height: 16.adaptSize,
-                          width: 16.adaptSize),
-                      Padding(
-                          padding: EdgeInsets.only(left: 10.h),
-                          child: Text("msg_restore_to_device".tr,
-                              style: theme.textTheme.bodyLarge))
-                    ])),
-              ),
-              SizedBox(height: 29.v),
-              InkWell(
-                onTap: () {},
+                onTap: () {
+                  Get.to(CopyToMyDesignScreen(
+                    childId: item.id!,
+                    title: "Move To",
+                  ));
+                },
                 child: Padding(
                     padding: EdgeInsets.only(left: 1.h),
                     child: Row(children: [
@@ -146,7 +159,12 @@ class ItemOptionPageBottomsheet extends StatelessWidget {
               ),
               SizedBox(height: 30.v),
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  Get.to(CopyToMyDesignScreen(
+                    childId: item.id!,
+                    title: "Copy To",
+                  ));
+                },
                 child: Padding(
                     padding: EdgeInsets.only(left: 1.h),
                     child: Row(children: [

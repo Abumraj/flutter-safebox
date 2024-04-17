@@ -1,126 +1,126 @@
-// import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+// // import 'package:flutter/material.dart';
+// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-class NotificationService {
-  // Singleton pattern
-  static final NotificationService _notificationService =
-      NotificationService._internal();
-  factory NotificationService() {
-    return _notificationService;
-  }
+// class NotificationService {
+//   // Singleton pattern
+//   static final NotificationService _notificationService =
+//       NotificationService._internal();
+//   factory NotificationService() {
+//     return _notificationService;
+//   }
 
-  NotificationService._internal();
+//   NotificationService._internal();
 
-  static const channelId = "1";
+//   static const channelId = "1";
 
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+//   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+//       FlutterLocalNotificationsPlugin();
 
-  static const AndroidNotificationDetails _androidNotificationDetails =
-      AndroidNotificationDetails(
-    channelId,
-    "safeBOX",
-    channelDescription: "Backup Notification",
-    playSound: true,
-    priority: Priority.high,
-    importance: Importance.high,
-    // progress: progress.progress ?? 0,
-    //         enableVibration: false,
-    //         importance: Importance.low,
-    //         showProgress: true,
-    //         onlyAlertOnce: true,
-    //         maxProgress: 100,
-    //         channelShowBadge: false,
-  );
+//   static const AndroidNotificationDetails _androidNotificationDetails =
+//       AndroidNotificationDetails(
+//     channelId,
+//     "safeBOX",
+//     channelDescription: "Backup Notification",
+//     playSound: true,
+//     priority: Priority.high,
+//     importance: Importance.high,
+//     // progress: progress.progress ?? 0,
+//     //         enableVibration: false,
+//     //         importance: Importance.low,
+//     //         showProgress: true,
+//     //         onlyAlertOnce: true,
+//     //         maxProgress: 100,
+//     //         channelShowBadge: false,
+//   );
 
-  static const DarwinNotificationDetails _iOSNotificationDetails =
-      DarwinNotificationDetails();
+//   static const DarwinNotificationDetails _iOSNotificationDetails =
+//       DarwinNotificationDetails();
 
-  final NotificationDetails notificationDetails = const NotificationDetails(
-    android: _androidNotificationDetails,
-    iOS: _iOSNotificationDetails,
-  );
+//   final NotificationDetails notificationDetails = const NotificationDetails(
+//     android: _androidNotificationDetails,
+//     iOS: _iOSNotificationDetails,
+//   );
 
-  Future<void> init() async {
-    final AndroidInitializationSettings androidInitializationSettings =
-        AndroidInitializationSettings("@mipmap/ic_launcher");
+//   Future<void> init() async {
+//     final AndroidInitializationSettings androidInitializationSettings =
+//         AndroidInitializationSettings("@mipmap/ic_launcher");
 
-    final DarwinInitializationSettings iOSInitializationSettings =
-        DarwinInitializationSettings(
-      defaultPresentAlert: false,
-      defaultPresentBadge: false,
-      defaultPresentSound: false,
-    );
+//     final DarwinInitializationSettings iOSInitializationSettings =
+//         DarwinInitializationSettings(
+//       defaultPresentAlert: false,
+//       defaultPresentBadge: false,
+//       defaultPresentSound: false,
+//     );
 
-    final InitializationSettings initializationSettings =
-        InitializationSettings(
-      android: androidInitializationSettings,
-      iOS: iOSInitializationSettings,
-    );
+//     final InitializationSettings initializationSettings =
+//         InitializationSettings(
+//       android: androidInitializationSettings,
+//       iOS: iOSInitializationSettings,
+//     );
 
-    // *** Initialize timezone here ***
+//     // *** Initialize timezone here ***
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onDidReceiveBackgroundNotificationResponse:
-            (NotificationResponse response) {},
-        onDidReceiveNotificationResponse: (NotificationResponse response) {}
-        // : onSelectNotification,
-        );
-  }
+//     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+//         onDidReceiveBackgroundNotificationResponse:
+//             (NotificationResponse response) {},
+//         onDidReceiveNotificationResponse: (NotificationResponse response) {}
+//         // : onSelectNotification,
+//         );
+//   }
 
-  Future<void> requestIOSPermissions() async {
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-  }
+//   Future<void> requestIOSPermissions() async {
+//     await flutterLocalNotificationsPlugin
+//         .resolvePlatformSpecificImplementation<
+//             IOSFlutterLocalNotificationsPlugin>()
+//         ?.requestPermissions(
+//           alert: true,
+//           badge: true,
+//           sound: true,
+//         );
+//   }
 
-  Future<void> showNotification(int id, String title, String body,
-      NotificationDetails notificationDetails) async {
-    await flutterLocalNotificationsPlugin.show(
-      id,
-      title,
-      body,
-      notificationDetails,
-      // payload: payload,
-    );
-  }
+//   Future<void> showNotification(int id, String title, String body,
+//       NotificationDetails notificationDetails) async {
+//     await flutterLocalNotificationsPlugin.show(
+//       id,
+//       title,
+//       body,
+//       notificationDetails,
+//       // payload: payload,
+//     );
+//   }
 
-  // Future<void> scheduleNotification(int id, String title, String body,
-  //     DateTime eventDate, TimeOfDay eventTime, String payload,
-  //     [DateTimeComponents? dateTimeComponents]) async {
-  //   final scheduledTime = eventDate.add(Duration(
-  //     hours: eventTime.hour,
-  //     minutes: eventTime.minute,
-  //   ));
-  //   await flutterLocalNotificationsPlugin.zonedSchedule(
-  //     id,
-  //     title,
-  //     body,
-  //     tz.TZDateTime.from(scheduledTime, tz.local),
-  //     notificationDetails,
-  //     uiLocalNotificationDateInterpretation:
-  //         UILocalNotificationDateInterpretation.absoluteTime,
-  //     androidAllowWhileIdle: true,
-  //     payload: payload,
-  //     matchDateTimeComponents: dateTimeComponents,
-  //   );
-  // }
+//   // Future<void> scheduleNotification(int id, String title, String body,
+//   //     DateTime eventDate, TimeOfDay eventTime, String payload,
+//   //     [DateTimeComponents? dateTimeComponents]) async {
+//   //   final scheduledTime = eventDate.add(Duration(
+//   //     hours: eventTime.hour,
+//   //     minutes: eventTime.minute,
+//   //   ));
+//   //   await flutterLocalNotificationsPlugin.zonedSchedule(
+//   //     id,
+//   //     title,
+//   //     body,
+//   //     tz.TZDateTime.from(scheduledTime, tz.local),
+//   //     notificationDetails,
+//   //     uiLocalNotificationDateInterpretation:
+//   //         UILocalNotificationDateInterpretation.absoluteTime,
+//   //     androidAllowWhileIdle: true,
+//   //     payload: payload,
+//   //     matchDateTimeComponents: dateTimeComponents,
+//   //   );
+//   // }
 
-  Future<void> cancelNotification(int id) async {
-    await flutterLocalNotificationsPlugin.cancel(id);
-  }
+//   Future<void> cancelNotification(int id) async {
+//     await flutterLocalNotificationsPlugin.cancel(id);
+//   }
 
-  Future<void> cancelAllNotifications() async {
-    await flutterLocalNotificationsPlugin.cancelAll();
-  }
-}
-
-// Future<void> onSelectNotification(String? payload) async {
-//   await navigatorKey.currentState
-//       ?.push(MaterialPageRoute(builder: (_) => DetailsPage(payload: payload)));
+//   Future<void> cancelAllNotifications() async {
+//     await flutterLocalNotificationsPlugin.cancelAll();
+//   }
 // }
+
+// // Future<void> onSelectNotification(String? payload) async {
+// //   await navigatorKey.currentState
+// //       ?.push(MaterialPageRoute(builder: (_) => DetailsPage(payload: payload)));
+// // }

@@ -1,4 +1,5 @@
 import 'package:safebox/controller/account_controller.dart';
+import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:safebox/presentation/files_page_screen.dart';
 
 import '../controller/added_folder_one_controller.dart';
@@ -29,9 +30,14 @@ class FilescolumnItemWidget extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: InkWell(
             onTap: () {
-              Get.to(FilesPageScreen(
-                title: filescolumnItemModelObj.filesText!.value,
-              ));
+              if (filescolumnItemModelObj.isActive!.value) {
+                Get.to(FilesPageScreen(
+                  title: filescolumnItemModelObj.filesText!.value,
+                ));
+              } else {
+                ProgressDialogUtils.showFailureToast(
+                    "${filescolumnItemModelObj.filesText!.value} upload and back up coming soon");
+              }
             },
             child: Container(
               width: 100.h,

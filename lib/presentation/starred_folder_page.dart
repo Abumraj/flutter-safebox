@@ -1,4 +1,3 @@
-import 'package:background_downloader/background_downloader.dart';
 import 'package:flutter/material.dart';
 import 'package:safebox/controller/account_controller.dart';
 import 'package:safebox/controller/starred_folder_controller.dart';
@@ -33,19 +32,23 @@ class _StarredFolderPageState extends State<StarredFolderPage> {
   final ApiRepositoryImplementation _apiRepositoryImplementation =
       Get.put(ApiRepositoryImplementation());
   final AccountController accountController = Get.put(AccountController());
+
   final Uploadanager uploadController = Get.put(Uploadanager());
 
-  ScrollController _scrollController = new ScrollController();
+  final ScrollController _scrollController = ScrollController();
   bool isGridView = false;
   List<UserfilesItemModel> recentFiles = [];
+  final TextEditingController _searchController = TextEditingController();
+  List<UserfilesItemModel> searchResult = [];
   bool isLoading = false;
-  TaskRecord? trackRecord;
-
+  int page = 1;
+  bool hasMore = false;
   @override
   void initState() {
-    recentFilesCall();
-    trckUploadProgress();
+    accountController.refreshProfile(false).then((value) => recentFilesCall());
     super.initState();
+    // recentFilesCall();
+    _scrollController.addListener(_onScroll);
   }
 
   @override
@@ -54,46 +57,53 @@ class _StarredFolderPageState extends State<StarredFolderPage> {
     super.dispose();
   }
 
-  trckUploadProgress() async {
-    final record = await FileDownloader()
-        .database
-        .recordForId(Uploadanager.backupTask.taskId);
-    if (record!.status == TaskStatus.running) {
-      trackRecord = record;
-      print('-- progress ${record.progress * 100}%');
-      print('-- file size ${record.expectedFileSize} bytes');
-    }
-  }
-
-  void recentFilesCall() {
+  void recentFilesCall() async {
     setState(() {
       isLoading = true;
     });
-    accountController.refreshProfile();
-    _apiRepositoryImplementation.getRecentFiles().then((value) {
-      List<UserfilesItemModel> list = parsedFileList(value.data['data']);
+    await _apiRepositoryImplementation.getRecentFiles().then((value) {
       setState(() {
-        recentFiles = list; // Assign the new list directly
+        recentFiles = value.items;
+        hasMore = value.hasMoreItems;
+        page = value.currentPage; // Assign the new list directly
         isLoading = false;
-        print(recentFiles.length); // Assign the new list directly
+        // print(hasMore);
+        // print(allFiles.length); // Assign the new list directly
       });
     });
   }
 
   void recentFilesCallBack() {
     _apiRepositoryImplementation.getRecentFiles().then((value) {
-      List<UserfilesItemModel> list = parsedFileList(value.data['data']);
       setState(() {
-        recentFiles = list;
+        recentFiles = value.items;
+        hasMore = value.hasMoreItems;
+        page = value.currentPage; // Assign the new list directly
+        isLoading = false;
+        // print(hasMore);
+        // print(allFiles.length); // Assign the new list directly
       });
     });
   }
 
-  static List<UserfilesItemModel> parsedFileList(dynamic responseBody) {
-    final parsed = responseBody.cast<Map<String, dynamic>>();
-    return parsed
-        .map<UserfilesItemModel>((json) => UserfilesItemModel.fromJson(json))
-        .toList();
+  Future<void> _loadMoreItems() async {
+    if (!isLoading && hasMore) {
+      _apiRepositoryImplementation.getAllFiles(page + 1).then((value) {
+        setState(() {
+          recentFiles.addAll(value.items);
+          hasMore = value.hasMoreItems;
+          page = value.currentPage;
+        });
+      });
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      // print("loadmore");
+      _loadMoreItems();
+    }
   }
 
   sortAscending() {
@@ -137,6 +147,21 @@ class _StarredFolderPageState extends State<StarredFolderPage> {
     });
   }
 
+  Widget _buildLoadingIndicator() {
+    return const Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Center(
+        child: CircularProgressIndicator.adaptive(
+          strokeWidth: 4,
+          valueColor: AlwaysStoppedAnimation<Color>(
+            Colors.blue,
+            // Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
@@ -158,8 +183,21 @@ class _StarredFolderPageState extends State<StarredFolderPage> {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 30.h),
                   child: CustomSearchView(
-                    // controller: controller.searchController,
+                    controller: _searchController,
                     hintText: "msg_search_files_in".tr,
+                    // hintStyle: ,
+                    onChanged: (p0) {
+                      setState(() {
+                        searchResult = recentFiles
+                            .where((element) => element.name!
+                                .toLowerCase()
+                                .contains(p0.toLowerCase()))
+                            .toList();
+                        if (p0.isEmpty) {
+                          searchResult = [];
+                        }
+                      });
+                    },
                   ),
                 ),
                 Obx(() {
@@ -182,7 +220,6 @@ class _StarredFolderPageState extends State<StarredFolderPage> {
                     sortBySizedescending,
                     sortByDatedescending),
                 SizedBox(height: 15.v),
-
                 isLoading == true
                     ? const SizedBox(
                         child: Center(
@@ -195,77 +232,122 @@ class _StarredFolderPageState extends State<StarredFolderPage> {
                           ),
                         ),
                       )
-                    : Obx(() {
-                        return controller.isGridView.value == true
-                            ? GroupedListView.list(
-                                items: recentFiles,
+                    : searchResult.isEmpty && _searchController.text.isNotEmpty
+                        ? SizedBox(
+                            width: 220.h,
+                            child: Text("No Result Found",
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: CustomTextStyles
+                                    .titleLargeOpenSansGray40001))
+                        : searchResult.isNotEmpty
+                            ? ListView.builder(
+                                shrinkWrap: true,
                                 physics: const ScrollPhysics(),
-                                headerBuilder: (context, DateTime index) {
-                                  return Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 30.h, bottom: 10.h),
-                                      child: Text(
-                                        ProgressDialogUtils.formatDateTime(
-                                            index),
-                                        style: theme.textTheme.bodyMedium,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                listItemBuilder: (context,
-                                    int count,
-                                    int itemIndex,
-                                    UserfilesItemModel item,
-                                    int index) {
-                                  item = recentFiles[itemIndex];
+                                itemCount: searchResult.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  UserfilesItemModel item = searchResult[index];
+
                                   return CustomListView(
-                                    item: item,
-                                    reloadResource: recentFilesCallBack,
-                                  );
-                                },
-                                itemGrouper: ((item) => DateTime(
-                                    item.updatedAt!.year,
-                                    item.updatedAt!.month,
-                                    item.updatedAt!.day)))
-                            : GroupedListView.grid(
-                                items: recentFiles,
-                                physics: const NeverScrollableScrollPhysics(),
-                                headerBuilder: (context, DateTime index) {
-                                  return Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 30.h, bottom: 10.h),
-                                      child: Text(
-                                        ProgressDialogUtils.formatDateTime(
-                                            index),
-                                        style: theme.textTheme.bodyMedium,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                gridItemBuilder: (context,
-                                    int count,
-                                    int itemIndex,
-                                    UserfilesItemModel item,
-                                    int index) {
-                                  item = recentFiles[itemIndex];
-                                  return CustomGridView(
-                                    item: item,
-                                    reloadResource: recentFilesCallBack,
-                                  );
-                                },
-                                crossAxisCount: 2,
-                                itemGrouper: ((item) {
-                                  return DateTime(
-                                      item.updatedAt!.year,
-                                      item.updatedAt!.month,
-                                      item.updatedAt!.day);
-                                }),
-                              );
-                      })
+                                      item: item,
+                                      reloadResource: recentFilesCallBack);
+                                })
+                            : recentFiles.isEmpty
+                                ? SizedBox(
+                                    width: 220.h,
+                                    child: Text("msg_you_have_no_files".tr,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                        style: CustomTextStyles
+                                            .titleLargeOpenSansGray40001))
+                                : Obx(() {
+                                    return controller.isGridView.value == true
+                                        ? GroupedListView.list(
+                                            items: recentFiles,
+                                            physics: const ScrollPhysics(),
+                                            headerBuilder:
+                                                (context, DateTime index) {
+                                              return Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Padding(
+                                                  padding: EdgeInsets.only(
+                                                      left: 30.h, bottom: 10.h),
+                                                  child: Text(
+                                                    ProgressDialogUtils
+                                                        .formatDateTime(index),
+                                                    style: theme
+                                                        .textTheme.bodyMedium,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            listItemBuilder: (context, count,
+                                                itemIndex, item, index) {
+                                              if (index ==
+                                                      recentFiles.length - 1 &&
+                                                  hasMore) {
+                                                return _buildLoadingIndicator();
+                                              }
+                                              return CustomListView(
+                                                item: item,
+                                                reloadResource:
+                                                    recentFilesCallBack,
+                                              );
+                                            },
+                                            // Group items by year, month, and day of `updatedAt`
+                                            itemGrouper: (item) => DateTime(
+                                              item.updatedAt!.year,
+                                              item.updatedAt!.month,
+                                              item.updatedAt!.day,
+                                            ),
+                                          )
+                                        : GroupedListView.grid(
+                                            items: recentFiles,
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            headerBuilder:
+                                                (context, DateTime index) {
+                                              return Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Padding(
+                                                  padding: EdgeInsets.only(
+                                                      left: 30.h, bottom: 10.h),
+                                                  child: Text(
+                                                    ProgressDialogUtils
+                                                        .formatDateTime(index),
+                                                    style: theme
+                                                        .textTheme.bodyMedium,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            gridItemBuilder: (context,
+                                                int count,
+                                                int itemIndex,
+                                                UserfilesItemModel item,
+                                                int index) {
+                                              if (index ==
+                                                      recentFiles.length - 1 &&
+                                                  hasMore) {
+                                                return _buildLoadingIndicator();
+                                              }
+                                              return CustomGridView(
+                                                item: item,
+                                                reloadResource:
+                                                    recentFilesCallBack,
+                                              );
+                                            },
+                                            crossAxisCount: 2,
+                                            itemGrouper: ((item) {
+                                              return DateTime(
+                                                  item.updatedAt!.year,
+                                                  item.updatedAt!.month,
+                                                  item.updatedAt!.day);
+                                            }),
+                                          );
+                                  })
                 // SizedBox(height: 521.v),
               ],
             ),

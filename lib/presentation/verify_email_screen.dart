@@ -1,19 +1,45 @@
+import 'package:safebox/controller/create_account_controller.dart';
 import 'package:safebox/controller/verify_email_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:safebox/core/app_export.dart';
-import 'package:safebox/presentation/getting_started_screen.dart';
 import 'package:safebox/widgets/custom_elevated_button.dart';
 import 'package:safebox/widgets/custom_pin_code_text_field.dart';
 
 // ignore_for_file: must_be_immutable
-class VerifyEmailScreen extends GetWidget<VerifyEmailController> {
-  VerifyEmailScreen({Key? key})
-      : super(
-          key: key,
-        );
+class VerifyEmailScreen extends StatefulWidget {
+  final String phoneNumber;
+  const VerifyEmailScreen({
+    super.key,
+    required this.phoneNumber,
+  });
 
+  @override
+  State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
+}
+
+class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   final VerifyEmailController verifyEmailController =
       Get.put(VerifyEmailController());
+
+  final CreateAccountController createAccountController =
+      Get.put(CreateAccountController());
+  String referenceId = '';
+
+  @override
+  void initState() {
+    sendPhoneverify();
+    super.initState();
+  }
+
+  sendPhoneverify() async {
+    createAccountController
+        .sendPhoneVrificationCode(widget.phoneNumber)
+        .then((value) {
+      setState(() {
+        referenceId = value;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +70,7 @@ class VerifyEmailScreen extends GetWidget<VerifyEmailController> {
               SizedBox(
                 width: 175.h,
                 child: Text(
-                  "msg_enter_the_4_digit".tr,
+                  "Enter the 4-Digit code sent to ${widget.phoneNumber}",
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
@@ -58,33 +84,59 @@ class VerifyEmailScreen extends GetWidget<VerifyEmailController> {
                 padding: EdgeInsets.symmetric(horizontal: 45.h),
                 child: Obx(
                   () => CustomPinCodeTextField(
+                    onComplete: (p0) {
+                      print(p0);
+                      createAccountController.confirmPhoeVerificationCode(
+                          referenceId, p0);
+                    },
                     context: Get.context!,
-                    controller: controller.otpController.value,
+                    controller: verifyEmailController.otpController.value,
+                    textStyle: CustomTextStyles.headlineSmallBlue90001,
                     onChanged: (value) {
-                      controller.otpController.value.text = value;
-                      print(controller.otpController.value);
+                      verifyEmailController.otpController.value.text = value;
+                      print(verifyEmailController.otpController.value.text);
                     },
                   ),
                 ),
               ),
               SizedBox(height: 23.v),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "msg_didn_t_receive_code2".tr,
-                      style: CustomTextStyles.bodyMedium_2,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "msg_didn_t_receive_code2".tr,
+                          style: CustomTextStyles.bodyMedium_2,
+                        ),
+                        const TextSpan(
+                          text: " ",
+                        ),
+                        // TextSpan(
+                        //   text: "lbl_send_again".tr,
+                        //   style: CustomTextStyles.bodyMediumBlue800,
+                        // ),
+                      ],
                     ),
-                    const TextSpan(
-                      text: " ",
-                    ),
-                    TextSpan(
-                      text: "lbl_send_again".tr,
+                    textAlign: TextAlign.left,
+                  ),
+                  InkWell(
+                    onTap: () {
+                      createAccountController
+                          .sendPhoneVrificationCode(widget.phoneNumber)
+                          .then((value) {
+                        setState(() {
+                          referenceId = value;
+                        });
+                      });
+                    },
+                    child: Text(
+                      "lbl_send_again".tr,
                       style: CustomTextStyles.bodyMediumBlue800,
                     ),
-                  ],
-                ),
-                textAlign: TextAlign.left,
+                  )
+                ],
               ),
               SizedBox(height: 43.v),
               CustomElevatedButton(
@@ -94,7 +146,9 @@ class VerifyEmailScreen extends GetWidget<VerifyEmailController> {
                 buttonTextStyle:
                     CustomTextStyles.titleMediumOpenSansWhiteA700SemiBold,
                 onPressed: () {
-                  Get.to(GettingStartedScreen());
+                  createAccountController.confirmPhoeVerificationCode(
+                      referenceId, verifyEmailController.otpController.value);
+                  // Get.to(const GettingStartedScreen());
                 },
               ),
               SizedBox(height: 5.v),

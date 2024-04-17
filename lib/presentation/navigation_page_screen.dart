@@ -153,7 +153,8 @@ class NavigationPageScreen extends GetWidget<AccountController> {
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: CustomImageView(
-                  imagePath: ImageConstant.imgRectangle290,
+                  imagePath: accountController.accountModelObj.value.picture ??
+                      ImageConstant.imageNotFound,
                   height: 69.v,
                   width: 60.h,
                   radius: BorderRadius.circular(6.h)),
@@ -172,11 +173,18 @@ class NavigationPageScreen extends GetWidget<AccountController> {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
+                        // crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           SizedBox(
                             child: Text(
-                                controller.accountModelObj.value.name
-                                    .toString(),
+                                controller.accountModelObj.value.name!
+                                            .characters.length <
+                                        14
+                                    ? controller.accountModelObj.value.name
+                                        .toString()
+                                    : controller.accountModelObj.value.name
+                                        .toString()
+                                        .substring(0, 14),
                                 style: CustomTextStyles.titleMediumWhiteA700_1),
                           ),
                           SizedBox(

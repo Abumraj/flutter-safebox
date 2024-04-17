@@ -9,7 +9,6 @@ import 'package:safebox/presentation/login_screen.dart';
 import 'package:safebox/widgets/custom_elevated_button.dart';
 import 'package:safebox/widgets/custom_outlined_button.dart';
 import 'package:safebox/widgets/custom_text_form_field.dart';
-// import 'package:country_pickers/country.dart';
 
 // ignore_for_file: must_be_immutable
 class CreateAccountScreen extends GetWidget<CreateAccountController> {
@@ -20,6 +19,7 @@ class CreateAccountScreen extends GetWidget<CreateAccountController> {
   final CreateAccountController createAccountController =
       Get.put(CreateAccountController());
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String? checkPassword;
 
   @override
   Widget build(BuildContext context) {
@@ -156,13 +156,16 @@ class CreateAccountScreen extends GetWidget<CreateAccountController> {
                         ),
                         SizedBox(height: 6.v),
                         _buildPassword(),
+                        if (controller.passwordController.text.isNotEmpty)
+                          passwordValidationWidget(
+                              controller.passwordController.text),
                         Align(
                           alignment: Alignment.centerLeft,
                           child: RichText(
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: "lbl_password2".tr,
+                                  text: "Referral",
                                   style: CustomTextStyles
                                       .labelLargeSofiaProGray500,
                                 ),
@@ -232,6 +235,7 @@ class CreateAccountScreen extends GetWidget<CreateAccountController> {
   }
 
   onTapLoginButton() async {
+    // await GoogleAuthHelper().verifyPhoneNumber();
     await GoogleAuthHelper().googleSignInProcess().then((googleUser) {
       if (googleUser != null) {
         controller.googleLogin(googleUser.displayName, googleUser.email, true);
@@ -397,9 +401,9 @@ class CreateAccountScreen extends GetWidget<CreateAccountController> {
           maxHeight: 50.v,
         ),
         validator: (value) {
+          checkPassword = value;
           if (value == null || (!isValidPassword(value, isRequired: true))) {
-            return "Password must contain upper case, lower case, digit, special character and no white space"
-                .tr;
+            return "Password must contain at least:".tr;
           }
           return null;
         },
@@ -424,5 +428,59 @@ class CreateAccountScreen extends GetWidget<CreateAccountController> {
         // Get.to(VerifyEmailScreen());
       },
     );
+  }
+
+  passwordValidationWidget(String? value) {
+    if (value == null || (!isValidPassword(value, isRequired: true))) {
+      return Obx(() {
+        return controller.isPasswordEmpty.value == false
+            ? const SizedBox()
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(" - 8 characters",
+                      style: TextStyle(
+                          color: value != null && value.length >= 8
+                              ? Colors.green
+                              : Colors.red)),
+                  Text(" - One uppercase letter",
+                      style: TextStyle(
+                          color:
+                              value != null && value.contains(RegExp(r'[A-Z]'))
+                                  ? Colors.green
+                                  : Colors.red)),
+                  Text(" - One lowercase letter",
+                      style: TextStyle(
+                          color:
+                              value != null && value.contains(RegExp(r'[a-z]'))
+                                  ? Colors.green
+                                  : Colors.red)),
+                  Text(" - One digit",
+                      style: TextStyle(
+                          color:
+                              value != null && value.contains(RegExp(r'[0-9]'))
+                                  ? Colors.green
+                                  : Colors.red)),
+                  Text(" - One special character",
+                      style: TextStyle(
+                          color: value != null &&
+                                  value.contains(
+                                      RegExp(r'[!@#$%^&*(),.?":{}|<>]'))
+                              ? Colors.green
+                              : Colors.red)),
+                  Text(
+                    " - No whitespace",
+                    style: TextStyle(
+                        color: value != null && !value.contains(RegExp(r'\s'))
+                            ? Colors.green
+                            : Colors.red),
+                  )
+                ],
+              );
+      });
+    } else {
+      return const SizedBox();
+    }
   }
 }

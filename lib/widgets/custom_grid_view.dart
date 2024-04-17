@@ -1,26 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/models/userfiles_item_model.dart';
+import 'package:safebox/presentation/copy_page_screen.dart';
 import 'package:safebox/presentation/item_option_page_bottomsheet.dart';
 import 'package:safebox/presentation/move_to_my_design_screen.dart';
 
 class CustomGridView extends StatelessWidget {
   final UserfilesItemModel item;
   final Function reloadResource;
+  final bool? isCopy;
+  final int? childId;
 
   const CustomGridView(
-      {super.key, required this.item, required this.reloadResource});
+      {super.key,
+      required this.item,
+      required this.reloadResource,
+      this.isCopy,
+      this.childId});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
         if (item.isFolder == 1) {
-          Get.to(MoveToMyDesignScreen(
-            path: item.path!,
-            folderId: item.id!,
-            name: item.name!,
-          ));
+          if (isCopy == null) {
+            Get.to(MoveToMyDesignScreen(
+              path: item.path!,
+              folderId: item.id!,
+              name: item.name!,
+            ));
+          } else {
+            Get.to(CopyOrMoveScreen(
+              fileId: childId!,
+              path: item.path!,
+              folderId: item.id!,
+              name: isCopy! ? "Copy to ${item.name!}" : "Move to ${item.name!}",
+              isCopy: isCopy!,
+            ));
+          }
         }
       },
       child: SizedBox(
@@ -76,14 +93,14 @@ class CustomGridView extends StatelessWidget {
                     children: [
                       SizedBox(
                         width:
-                            item.name!.characters.length < 14 ? 100.h : 130.h,
+                            item.name!.characters.length < 10 ? 100.h : 130.h,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               item.name!.characters.length < 14
                                   ? item.name.toString()
-                                  : "${item.name.toString().substring(0, 14)}..",
+                                  : "${item.name.toString().substring(0, 10)}..",
                               style: theme.textTheme.titleSmall!.copyWith(
                                 color: theme.colorScheme.onPrimary,
                               ),

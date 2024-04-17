@@ -10,7 +10,6 @@ dependencies:
    flutter: 
     sdk: flutter
    get:
-   connectivity_plus: 
    shared_preferences: 
    cached_network_image: ^3.3.1 
    flutter_svg: 
@@ -21,14 +20,12 @@ dependencies:
    flutter_svg_provider: 
    dotted_border: 
    intl: 
-   country_code_picker:
    dio:
    intl_phone_field: ^3.2.0
    fluttertoast: ^8.2.4
    simple_grouped_listview: ^2.0.0
    flutter_contacts: ^1.1.7+1
    file_picker: ^6.1.1
-   flutter_local_notifications: ^16.3.0
    background_downloader: ^7.6.0
    path_provider:
    firebase_core: ^2.25.4
@@ -38,7 +35,6 @@ dependencies:
    flutter_archive: ^6.0.0
    webview_flutter: ^4.7.0
    disk_space_update: ^0.0.2
-
 
 dev_dependencies:
   flutter_test:

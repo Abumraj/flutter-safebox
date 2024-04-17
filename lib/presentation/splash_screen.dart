@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:safebox/core/app_export.dart';
+import 'package:safebox/core/upload_manager.dart';
 import 'package:safebox/presentation/home_page_screen.dart';
 import 'package:safebox/presentation/login_screen.dart';
 import 'package:safebox/presentation/welcome.dart';
@@ -15,7 +17,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   // final UserProfileManager userProfileManager = Get.find();
-
+  final Uploadanager uploadController = Get.put(Uploadanager());
+  bool dbChanged = false;
   Timer? _timer;
   _startDelay() {
     _timer = Timer(const Duration(seconds: 3), _goNext);
@@ -32,11 +35,16 @@ class _SplashScreenState extends State<SplashScreen> {
     } else {
       Get.off(const Welcome());
     }
+    uploadController.cacheContacts(dbChanged);
   }
 
   @override
   void initState() {
     super.initState();
+    FlutterContacts.addListener(() {
+      // dbChanged = true;
+      uploadController.cacheContacts(true);
+    });
     _startDelay();
   }
 

@@ -1,6 +1,3 @@
-import 'package:safebox/core/apirepository_implementation.dart';
-import 'package:safebox/core/utils/progress_dialog_utils.dart';
-
 import '../../../core/app_export.dart';
 import 'fileoptions_item_model.dart';
 
@@ -10,8 +7,32 @@ class GettingStartedModel extends GetxController {
   // final ApiRepositoryImplementation _apiRepositoryImplementation =
   //     Get.put(ApiRepositoryImplementation());
   List<FileoptionsItemModel> fileoptionsItemList = [];
-  List<bool> backupOptions = [];
+  // List<bool> backupOptions = [];
+  RxList<bool> backupOptions = <bool>[].obs;
   Rx<bool> isSelected = false.obs;
+  Rx<bool> updateState = false.obs;
+
+  updateBackUpOption(int index) {
+    updateState.value = false;
+    for (var i = 0; i < backupOptions.length; i++) {
+      if (i == index) {
+        if (backupOptions[i] == true) {
+          backupOptions[i] = false;
+          isSelected.value = false;
+        } else {
+          backupOptions[i] = true;
+          isSelected.value = true;
+        }
+        // fileoptionsItemList[i].checkmarkImage = true;
+      } else {
+        backupOptions[i] = false;
+        isSelected.value = false;
+        // fileoptionsItemList[i].checkmarkImage = false;
+      }
+    }
+    updateState.value = true;
+    update();
+  }
 
   // @override
   // void onInit() {

@@ -53,10 +53,15 @@ class SortPageBottomsheet extends StatelessWidget {
                         .titleSmallOpenSansOnPrimaryContainerSemiBold,
                   ),
                 ),
-                CustomImageView(
-                  imagePath: ImageConstant.imgArrowRightOnprimary,
-                  height: 30.adaptSize,
-                  width: 30.adaptSize,
+                InkWell(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: CustomImageView(
+                    imagePath: ImageConstant.imgArrowRightOnprimary,
+                    height: 30.adaptSize,
+                    width: 30.adaptSize,
+                  ),
                 ),
               ],
             ),

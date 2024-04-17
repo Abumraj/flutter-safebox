@@ -23,6 +23,7 @@ class AccountController extends GetxController {
   TextEditingController bankController = TextEditingController();
 
   TextEditingController emailController = TextEditingController();
+  TextEditingController withdrawController = TextEditingController();
 
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController currentPasswordController = TextEditingController();
@@ -59,9 +60,9 @@ class AccountController extends GetxController {
     phoneNumberController.dispose();
   }
 
-  refreshProfile() {
+  Future refreshProfile(bool refresh) async {
     // isRefreshProfile.toggle();
-    _apiRepositoryImplementation.getUserDetail().then((value) {
+    await _apiRepositoryImplementation.getUserDetail(refresh).then((value) {
       accountModelObj.value = value;
       nameController.text = accountModelObj.value.name.toString();
       emailController.text = accountModelObj.value.email.toString();
@@ -96,7 +97,7 @@ class AccountController extends GetxController {
 
     _apiRepositoryImplementation.postUpdateProfile(data).then((value) {
       if (value == "Profile updated successfully") {
-        refreshProfile();
+        refreshProfile(true);
         ProgressDialogUtils.hideProgressDialog();
         ProgressDialogUtils.showSuccessToast("Profile Updated Successfully");
         Get.off(const HomePageScreen());
@@ -121,6 +122,26 @@ class AccountController extends GetxController {
         ProgressDialogUtils.hideProgressDialog();
         ProgressDialogUtils.showSuccessToast("Password changed successfully");
         Get.off(const HomePageScreen());
+      } else {
+        ProgressDialogUtils.hideProgressDialog();
+        ProgressDialogUtils.showFailureToast("An Error Occurred");
+      }
+    });
+    update();
+  }
+
+  withDrawalRequest() {
+    ProgressDialogUtils.showProgressDialog();
+    var data = {
+      'amount': withdrawController.text,
+    };
+
+    _apiRepositoryImplementation.postWithdrawal(data).then((value) {
+      if (value['message'] == "Withdrawal request successful") {
+        ProgressDialogUtils.hideProgressDialog();
+        ProgressDialogUtils.showSuccessToast(
+            "Withdrawal requested successfully");
+        // Get.off(const HomePageScreen());
       } else {
         ProgressDialogUtils.hideProgressDialog();
         ProgressDialogUtils.showFailureToast("An Error Occurred");

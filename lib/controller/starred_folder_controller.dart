@@ -32,7 +32,7 @@ class StarredFolderController extends GetxController {
 
   @override
   void onInit() {
-    recentFiles();
+    // recentFiles();
     super.onInit();
   }
 
@@ -41,45 +41,48 @@ class StarredFolderController extends GetxController {
     super.onClose();
     searchController.dispose();
   }
- sortAscending() {
-      starredFolderModelObj.value.sort((a, b) => (a.name ?? '').compareTo(b.name ?? ''));
+
+  sortAscending() {
+    starredFolderModelObj.value
+        .sort((a, b) => (a.name ?? '').compareTo(b.name ?? ''));
   }
 
   sortBySizeAscending() {
-      starredFolderModelObj.value.sort((a, b) =>
-          ProgressDialogUtils.getSizeComparableValue(b.size) -
-          ProgressDialogUtils.getSizeComparableValue(a.size));
+    starredFolderModelObj.value.sort((a, b) =>
+        ProgressDialogUtils.getSizeComparableValue(b.size) -
+        ProgressDialogUtils.getSizeComparableValue(a.size));
   }
 
   sortdescending() {
-      starredFolderModelObj.value.sort((a, b) => (b.name ?? '').compareTo(a.name ?? ''));
+    starredFolderModelObj.value
+        .sort((a, b) => (b.name ?? '').compareTo(a.name ?? ''));
   }
 
   sortByDatedescending() {
-      starredFolderModelObj.value.sort((a, b) =>
-          (b.updatedAt ?? DateTime(0)).compareTo(a.updatedAt ?? DateTime(0)));
+    starredFolderModelObj.value.sort((a, b) =>
+        (b.updatedAt ?? DateTime(0)).compareTo(a.updatedAt ?? DateTime(0)));
   }
 
   sortBySizedescending() {
-      starredFolderModelObj.value.sort((a, b) =>
-          ProgressDialogUtils.getSizeComparableValue(a.size) -
-          ProgressDialogUtils.getSizeComparableValue(b.size));
+    starredFolderModelObj.value.sort((a, b) =>
+        ProgressDialogUtils.getSizeComparableValue(a.size) -
+        ProgressDialogUtils.getSizeComparableValue(b.size));
   }
 
- void listGrid() {
-      isGridView.value = !isGridView.value;
+  void listGrid() {
+    isGridView.value = !isGridView.value;
   }
-  void recentFiles() {
-isLoading  =  true.obs;
-    _apiRepositoryImplementation.getRecentFiles().then((value) {
-      List<UserfilesItemModel> list = parsedFileList(value.data['data']);
-      starredFolderModelObj.value = list; // Assign the new list directly
-      canLoadMore.value = value.data['links']['next'] != null;
-     isLoading = false.obs;
-      // Trigger the reactivity system to update the UI
-      update();
-    });
-  }
+//   void recentFiles() {
+// isLoading  =  true.obs;
+//     _apiRepositoryImplementation.getRecentFiles().then((value) {
+//       List<UserfilesItemModel> list = parsedFileList(value.data['data']);
+//       starredFolderModelObj.value = list; // Assign the new list directly
+//       canLoadMore.value = value.data['links']['next'] != null;
+//      isLoading = false.obs;
+//       // Trigger the reactivity system to update the UI
+//       update();
+//     });
+//   }
 
   static List<UserfilesItemModel> parsedFileList(dynamic responseBody) {
     final parsed = responseBody.cast<Map<String, dynamic>>();

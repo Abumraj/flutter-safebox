@@ -1,7 +1,7 @@
 import 'package:safebox/controller/account_controller.dart';
+import 'package:safebox/models/filesection_item_model.dart';
 
 import '../../../core/app_export.dart';
-import 'filesection_item_model.dart';
 
 /// This class defines the variables used in the [storage_page_screen],
 /// and is typically used to hold data that is passed between different parts of the application.

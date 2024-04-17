@@ -80,7 +80,9 @@ class CustomListView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "${item.name}".tr,
+                    item.name!.characters.length < 24
+                        ? item.name.toString()
+                        : "${item.name.toString().substring(0, 24)}..",
                     style: theme.textTheme.titleMedium,
                   ),
                   SizedBox(height: 2.v),

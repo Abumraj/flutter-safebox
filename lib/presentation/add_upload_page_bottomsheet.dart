@@ -3,6 +3,7 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:safebox/controller/starred_folder_controller.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/upload_manager.dart';
+import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:safebox/presentation/contact_selection_page.dart';
 import 'package:safebox/presentation/name_folder_page_dialog.dart';
 
@@ -55,10 +56,15 @@ class AddUploadPageBottomsheet extends StatelessWidget {
                         .titleSmallOpenSansOnPrimaryContainerSemiBold,
                   ),
                 ),
-                CustomImageView(
-                  imagePath: ImageConstant.imgArrowRightOnprimary,
-                  height: 30.adaptSize,
-                  width: 30.adaptSize,
+                InkWell(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: CustomImageView(
+                    imagePath: ImageConstant.imgArrowRightOnprimary,
+                    height: 30.adaptSize,
+                    width: 30.adaptSize,
+                  ),
                 ),
               ],
             ),
@@ -80,7 +86,8 @@ class AddUploadPageBottomsheet extends StatelessWidget {
                       Get.back();
 
                       Get.dialog(AlertDialog(
-                        backgroundColor: Colors.transparent.withAlpha(3),
+                        backgroundColor: Colors.transparent,
+                        surfaceTintColor: Colors.transparent,
                         content: NameFolderPageDialog(
                           controller,
                           folderId: folderId,
@@ -98,89 +105,6 @@ class AddUploadPageBottomsheet extends StatelessWidget {
                         "lbl_create_folder".tr,
                         style: theme.textTheme.bodyLarge,
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: 30.v),
-          InkWell(
-            onTap: () {
-              // uploadController.backupWhatsapp();
-              Get.back();
-              uploadController.docsUpload(
-                  folderId: folderId, callBack: functionCallBack);
-            },
-            child: Padding(
-              padding: EdgeInsets.only(left: 11.h),
-              child: Row(
-                children: [
-                  CustomImageView(
-                    imagePath: ImageConstant.imgBxsCloudUpload,
-                    height: 16.adaptSize,
-                    width: 16.adaptSize,
-                    margin: EdgeInsets.only(bottom: 1.v),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 10.h),
-                    child: Text(
-                      "lbl_upload_files".tr,
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: 28.v),
-          InkWell(
-            onTap: () {
-              uploadController.photoUpload(
-                  folderId: folderId, callBack: functionCallBack);
-            },
-            child: Padding(
-              padding: EdgeInsets.only(left: 11.h),
-              child: Row(
-                children: [
-                  CustomImageView(
-                    imagePath: ImageConstant.imgFolderOnprimarycontainer,
-                    height: 16.adaptSize,
-                    width: 16.adaptSize,
-                    margin: EdgeInsets.only(bottom: 1.v),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 10.h),
-                    child: Text(
-                      "Upload Photos",
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: 28.v),
-          InkWell(
-            onTap: () {
-              uploadController.videoUpload(
-                  folderId: folderId, callBack: functionCallBack);
-            },
-            child: Padding(
-              padding: EdgeInsets.only(left: 11.h),
-              child: Row(
-                children: [
-                  CustomImageView(
-                    imagePath: ImageConstant.imgFolderOnprimarycontainer,
-                    height: 16.adaptSize,
-                    width: 16.adaptSize,
-                    margin: EdgeInsets.only(bottom: 1.v),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 10.h),
-                    child: Text(
-                      "Upload Videos",
-                      style: theme.textTheme.bodyLarge,
                     ),
                   ),
                 ],
@@ -221,33 +145,6 @@ class AddUploadPageBottomsheet extends StatelessWidget {
           SizedBox(height: 28.v),
           InkWell(
             onTap: () {
-              uploadController.audioUpload(
-                  folderId: folderId, callBack: functionCallBack);
-            },
-            child: Padding(
-              padding: EdgeInsets.only(left: 11.h),
-              child: Row(
-                children: [
-                  CustomImageView(
-                    imagePath: ImageConstant.imgAntDesignAudioFilled,
-                    height: 16.adaptSize,
-                    width: 16.adaptSize,
-                    margin: EdgeInsets.only(bottom: 1.v),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 10.h),
-                    child: Text(
-                      "lbl_upload_audio".tr,
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: 28.v),
-          InkWell(
-            onTap: () {
               Get.back();
               uploadController.whatsappUpload(
                   folderId: folderId, callBack: functionCallBack);
@@ -265,6 +162,122 @@ class AddUploadPageBottomsheet extends StatelessWidget {
                     padding: EdgeInsets.only(left: 10.h),
                     child: Text(
                       "msg_upload_whatsapp".tr,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 30.v),
+          InkWell(
+            onTap: () {
+              // uploadController.checkFileExist("1693167479685.jpg",
+              //     "/storage/emulated/0/Pictures/Recorder0");
+              // Get.back();
+              // uploadController.docsUpload(
+              //     folderId: folderId, callBack: functionCallBack);
+              ProgressDialogUtils.showFailureToast(
+                  "Document upload coming soon");
+            },
+            child: Padding(
+              padding: EdgeInsets.only(left: 11.h),
+              child: Row(
+                children: [
+                  CustomImageView(
+                    imagePath: ImageConstant.imgBxsCloudUpload,
+                    height: 16.adaptSize,
+                    width: 16.adaptSize,
+                    margin: EdgeInsets.only(bottom: 1.v),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 10.h),
+                    child: Text(
+                      "lbl_upload_files".tr,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 28.v),
+          InkWell(
+            onTap: () {
+              // uploadController.photoUpload(
+              //     folderId: folderId, callBack: functionCallBack);
+              ProgressDialogUtils.showFailureToast("Photos upload coming soon");
+            },
+            child: Padding(
+              padding: EdgeInsets.only(left: 11.h),
+              child: Row(
+                children: [
+                  CustomImageView(
+                    imagePath: ImageConstant.imgFolderOnprimarycontainer,
+                    height: 16.adaptSize,
+                    width: 16.adaptSize,
+                    margin: EdgeInsets.only(bottom: 1.v),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 10.h),
+                    child: Text(
+                      "Upload Photos",
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 28.v),
+          InkWell(
+            onTap: () {
+              // uploadController.videoUpload(
+              //     folderId: folderId, callBack: functionCallBack);
+              ProgressDialogUtils.showFailureToast("Videos upload coming soon");
+            },
+            child: Padding(
+              padding: EdgeInsets.only(left: 11.h),
+              child: Row(
+                children: [
+                  CustomImageView(
+                    imagePath: ImageConstant.imgFolderOnprimarycontainer,
+                    height: 16.adaptSize,
+                    width: 16.adaptSize,
+                    margin: EdgeInsets.only(bottom: 1.v),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 10.h),
+                    child: Text(
+                      "Upload Videos",
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 28.v),
+          InkWell(
+            onTap: () {
+              // uploadController.audioUpload(
+              //     folderId: folderId, callBack: functionCallBack);
+              ProgressDialogUtils.showFailureToast("Audios upload coming soon");
+            },
+            child: Padding(
+              padding: EdgeInsets.only(left: 11.h),
+              child: Row(
+                children: [
+                  CustomImageView(
+                    imagePath: ImageConstant.imgAntDesignAudioFilled,
+                    height: 16.adaptSize,
+                    width: 16.adaptSize,
+                    margin: EdgeInsets.only(bottom: 1.v),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 10.h),
+                    child: Text(
+                      "lbl_upload_audio".tr,
                       style: theme.textTheme.bodyLarge,
                     ),
                   ),

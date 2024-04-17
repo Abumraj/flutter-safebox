@@ -1,6 +1,5 @@
 import 'package:safebox/presentation/account_screen.dart';
 import 'package:safebox/presentation/change_password_screen.dart';
-import 'package:safebox/presentation/storage_page_one_screen.dart';
 import 'package:safebox/presentation/storage_page_screen.dart';
 
 import '../../../core/app_export.dart';

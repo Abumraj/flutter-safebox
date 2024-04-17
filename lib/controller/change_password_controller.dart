@@ -1,5 +1,4 @@
 import 'package:safebox/core/app_export.dart';
-import 'package:safebox/models/change_password_model.dart';
 import 'package:flutter/material.dart';
 
 /// A controller class for the ChangePasswordScreen.
@@ -13,8 +12,6 @@ class ChangePasswordController extends GetxController {
 
   TextEditingController confirmPasswordEditTextController =
       TextEditingController();
-
-  Rx<ChangePasswordModel> changePasswordModelObj = ChangePasswordModel().obs;
 
   Rx<bool> isShowPassword = true.obs;
 

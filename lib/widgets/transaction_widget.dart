@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
-import 'package:safebox/models/referred_user_model.dart';
+import 'package:safebox/models/transaction_model.dart';
 import 'package:safebox/widgets/custom_elevated_button.dart';
 
-class ReferredUserTile extends StatelessWidget {
-  ReferredUserTile(
+// ignore: must_be_immutable
+class TransactionTile extends StatelessWidget {
+  TransactionTile(
     this.userprofile1ItemModelObj, {
     Key? key,
   }) : super(
           key: key,
         );
 
-  ReeferredUserModel userprofile1ItemModelObj;
-
-  // var controller = Get.find<ReferController>();
-
+  TransactionModel userprofile1ItemModelObj;
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -35,12 +33,12 @@ class ReferredUserTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                userprofile1ItemModelObj.name.toString(),
+                userprofile1ItemModelObj.type.toString(),
                 style: theme.textTheme.bodyMedium,
               ),
               SizedBox(height: 4.v),
               Text(
-                "₦${userprofile1ItemModelObj.credit}",
+                "₦${userprofile1ItemModelObj.amount}",
                 style: theme.textTheme.bodySmall,
               ),
             ],
@@ -66,9 +64,9 @@ class ReferredUserTile extends StatelessWidget {
                 text: userprofile1ItemModelObj.status.toString(),
                 buttonTextStyle: CustomTextStyles.labelMediumOnPrimary,
                 buttonStyle:
-                    userprofile1ItemModelObj.status.toString() == "earned"
-                        ? CustomButtonStyles.fillGreen
-                        : CustomButtonStyles.fillAmberA,
+                    userprofile1ItemModelObj.status.toString() == "pending"
+                        ? CustomButtonStyles.fillAmberA
+                        : CustomButtonStyles.fillGreen,
                 alignment: Alignment.centerRight,
               ),
             ],

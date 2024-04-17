@@ -14,11 +14,13 @@ class CustomPinCodeTextField extends StatelessWidget {
     this.textStyle,
     this.hintStyle,
     this.validator,
+    required this.onComplete,
   }) : super(
           key: key,
         );
 
   final Alignment? alignment;
+  final Function(String) onComplete;
 
   final BuildContext context;
 
@@ -46,23 +48,25 @@ class CustomPinCodeTextField extends StatelessWidget {
         appContext: context,
         controller: controller,
         length: 4,
+        autoFocus: true,
         keyboardType: TextInputType.number,
         textStyle: textStyle ?? CustomTextStyles.headlineSmallBlue90001,
         hintStyle: hintStyle ?? CustomTextStyles.headlineSmallBlack90001,
+        onCompleted: onComplete,
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
         ],
         enableActiveFill: true,
         pinTheme: PinTheme(
-          fieldHeight: 2.h,
+          fieldHeight: 45.h,
           fieldWidth: 45.h,
-          shape: PinCodeFieldShape.underline,
+          shape: PinCodeFieldShape.box,
           inactiveFillColor: appTheme.amberA200,
-          activeFillColor: appTheme.blue800,
+          activeFillColor: appTheme.whiteA700,
           selectedFillColor: appTheme.amberA200,
-          inactiveColor: Colors.transparent,
-          activeColor: appTheme.blue800,
-          selectedColor: appTheme.gray500,
+          inactiveColor: appTheme.amberA200,
+          activeColor: appTheme.amberA200,
+          selectedColor: appTheme.blue700,
         ),
         onChanged: (value) => onChanged(value),
         validator: validator,

@@ -24,6 +24,7 @@ class LoginController extends GetxController {
   Rx<bool> isShowPassword = true.obs;
 
   Rx<bool> englishLabel = false.obs;
+  Rx<bool> isPasswordEmpty = true.obs;
 
   // @override
   // void onClose() {
@@ -47,10 +48,13 @@ class LoginController extends GetxController {
       if (value['message'] == 'login successful') {
         await Constants.saveUserTokenSharedPreference(value['token']);
         await Constants.saveUserLoggedInSharedPreference(englishLabel.value);
-        _accountController.refreshProfile();
+        _accountController.refreshProfile(true);
         ProgressDialogUtils.hideProgressDialog();
         if (value['is_verified'] == 0) {
-          Get.off(VerifyEmailScreen());
+          // Get.off(VerifyEmailScreen(
+          //   phoneNumber: value['phone'],
+          // ));
+          Get.off(const HomePageScreen());
         } else {
           Get.off(const HomePageScreen());
         }

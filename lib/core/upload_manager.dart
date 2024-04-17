@@ -3,6 +3,7 @@ import 'package:background_downloader/background_downloader.dart';
 import 'package:disk_space_update/disk_space_update.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
@@ -12,9 +13,11 @@ import 'package:safebox/controller/account_controller.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:safebox/presentation/upgrade_plan_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 String baseUrl = 'https://safebox.africa/api/file';
+// String baseUrl = 'http://192.168.43.144/api/file';
 
 class Uploadanager extends GetxController {
   final AccountController accountController = Get.put(AccountController());
@@ -244,7 +247,7 @@ class Uploadanager extends GetxController {
     FileDownloader().configure(globalConfig: [
       (Config.requestTimeout, const Duration(seconds: 100)),
     ], androidConfig: [
-      (Config.useCacheDir, Config.whenAble),
+      (Config.useExternalStorage, Config.always),
     ], iOSConfig: [
       (Config.localize, {'Cancel': 'StopIt'}),
     ]).then((result) => debugPrint('Configuration result = $result'));
@@ -272,36 +275,82 @@ class Uploadanager extends GetxController {
           progressBar: false,
         )
         .configureNotification(
-            // for the 'Download & Open' dog picture
-            // which uses 'download' which is not the .defaultGroup
-            // but the .await group so won't use the above config
-            complete: const TaskNotification(
-                'Backup {filename.length}', 'Backup complete'),
+            complete: const TaskNotification('Backup Completed', ''),
+            running: const TaskNotification('Processing files', '{progress}'),
+            progressBar: true,
             tapOpensFile: false);
-    // void myNotificationTapCallback(
-    //     Task task, NotificationType notificationType) {
-    //   debugPrint(
-    //       'Tapped notification $notificationType for taskId ${task.taskId}');
-    // }
   }
 
   Future<List<Contact>> extractContact() async {
-    List<Contact> recoveredContacts = [];
-    File importedContact =
-        File("/data/user/0/com.example.safebox/app_flutter/contacts.vcf");
-    if (importedContact.existsSync()) {
-      var vCardContacts = await File(
-              "/data/user/0/com.example.safebox/app_flutter/contacts.vcf")
-          .readAsString();
-      // ignore: unused_local_variable
-      List<String> vCardList = vCardContacts.split('\n');
+    Directory appDir = await getApplicationDocumentsDirectory();
 
-      List<Contact> recoveredContacts = [];
-      for (var element in vCardList) {
-        Contact contact = Contact.fromVCard(element);
-        print(contact.displayName);
-        recoveredContacts.add(contact);
+    List<Contact> recoveredContacts = [];
+    File importedContact = File("${appDir.path}/contacts.vcf");
+
+    if (importedContact.existsSync()) {
+      var vCardContacts = await importedContact.readAsString();
+      var lines = vCardContacts.split('\n');
+      var vCardData = '';
+
+      for (var line in lines) {
+        if (line.startsWith('BEGIN:VCARD')) {
+          vCardData = '';
+        }
+        vCardData += '$line\n';
+        if (line.startsWith('END:VCARD')) {
+          Contact contact = Contact.fromVCard(vCardData);
+          if (contact.displayName.toString() != 'null') {
+            // print(contact.displayName.toString());
+            recoveredContacts.add(contact);
+          }
+        }
       }
+    }
+    return recoveredContacts;
+  }
+
+  extractContact1(File importedContact) async {
+    // Directory appDir = await getApplicationDocumentsDirectory();
+
+    List<Contact> recoveredContacts = [];
+    // File importedContact = File("${appDir.path}/contacts.vcf");
+
+    if (importedContact.existsSync()) {
+      var vCardContacts = await importedContact.readAsString();
+      var lines = vCardContacts.split('\n');
+      var vCardData = '';
+      List<String> vCardList = [];
+
+      for (var line in lines) {
+        if (line.startsWith('BEGIN:VCARD')) {
+          vCardData = '';
+        }
+        vCardData += '$line\n';
+        if (line.startsWith('END:VCARD')) {
+          vCardList.add(vCardData);
+
+          // Contact contact = Contact.fromVCard(vCardData);
+          // if (contact.displayName.toString() != 'null') {
+          //   // print(contact.displayName.toString());
+          //   recoveredContacts.add(contact);
+          // }
+          await saveUploadedContactsToPrefs(vCardList);
+        }
+      }
+    }
+    // for (var contact in recoveredContacts) {
+    //   String vCard = contact.toVCard();
+    // }
+  }
+
+  List<Contact> convertVcardToContactList(vCardContacts) {
+    List<String> vCardList = vCardContacts;
+
+    List<Contact> recoveredContacts = [];
+    for (var element in vCardList) {
+      Contact contact = Contact.fromVCard(element);
+      // print(contact.phones.first.number);
+      recoveredContacts.add(contact);
     }
     return recoveredContacts;
   }
@@ -309,128 +358,253 @@ class Uploadanager extends GetxController {
   void uploadContact(List<Contact> contacts, {Function? callBack}) async {
     totalUploadSize = 0;
     List<Contact> preContact = [];
-    extractContact().then((value) {
-      if (value.isEmpty) {
+    await extractContact().then((value) async {
+      print(value.isNotEmpty);
+      if (value.isNotEmpty) {
         preContact.addAll(value);
       }
-    });
-    preContact.addAll(contacts);
-    // List<Contacts> contactToUpload = [];
-    List<String> vCardList = [];
+      preContact.addAll(contacts);
+      print(preContact.length);
+      // List<Contacts> contactToUpload = [];
+      // Combine vCard data into a single string
+      List<String> vCardList = [];
 
-    for (var contact in preContact) {
-      String vCard = contact.toVCard();
-      vCardList.add(vCard);
-    }
-    // Combine vCard data into a single string
-    String combinedVCardData = vCardList.join('\n');
-    Directory appDir = await getApplicationDocumentsDirectory();
-    File file = File('${appDir.path}/contacts.vcf');
-    file = await file.writeAsString(combinedVCardData);
-    file = File('${appDir.path}/contacts.vcf');
+      for (var contact in preContact) {
+        String vCard = contact.toVCard();
+        vCardList.add(vCard);
+      }
+      String combinedVCardData = vCardList.join('\n');
+      Directory appDir = await getApplicationDocumentsDirectory();
+      File file = File('${appDir.path}/contacts.vcf');
+      file = await file.writeAsString(combinedVCardData);
+      file = File('${appDir.path}/contacts.vcf');
 
-    totalUploadSize = file.lengthSync();
-    Constants.getUserTokenSharedPreference().then((value) {
-      _uploadFile(false, "", ["contacts.vcf"], value.toString(), "folderId",
-          "productId", callBack);
+      totalUploadSize = file.lengthSync();
+      Constants.getUserTokenSharedPreference().then((value) {
+        _uploadFile(false, "", [(file.path)], value.toString(), "folderId",
+            "contact", callBack);
+      });
     });
 
     // } else {
   }
 
   backUpContact() async {
-    List<Contact> contacts =
-        await FlutterContacts.getContacts(withProperties: true);
+    List<String> vcardcontacts = await getContactsFromPrefs();
+    List<Contact> contacts = convertVcardToContactList(vcardcontacts);
     uploadContact(contacts);
   }
 
-  downloadFile() async {
+  Future<String> selectDirectory() async {
+    String? restoreLocation = await FilePicker.platform.getDirectoryPath();
+    return restoreLocation!;
+  }
+
+  restoreToDevice(fileName, url) async {
+    ProgressDialogUtils.showSuccessToast("Select Location to store your file");
+
+    selectDirectory().then((value) async {
+      print(fileName);
+      print(url);
+      print(value);
+      await downloadFile(fileName, url, value);
+    });
+  }
+//   wa.db.crypt14
+// I/flutter ( 2735): https://safebox.africa/storage/pqeeS9I2HVjfdWoNdUkFPfY0ynJngbXMP2Yh4Jkf.tfm
+// I/flutter ( 2735): /storage/emulated/0/Download
+
+  downloadFile(
+    fileName,
+    url,
+    restoreLocation,
+  ) async {
     try {
       DownloadTask task = DownloadTask(
-          url:
-              "https://jsoncompare.org/LearningContainer/SampleFiles/Video/MP4/Sample-MP4-Video-File-Download.mp4",
-          filename: "sampleVideo",
-          directory: 'my_sub_directory',
+          url: url,
+          filename: fileName,
+          // directory: restoreLocation,
           updates: Updates.statusAndProgress,
           requiresWiFi: false,
           retries: 5,
-          allowPause: true,
-          metaData: 'data for me');
+          allowPause: false,
+          // baseDirectory: BaseDirectory.temporary,
+          httpRequestMethod: 'GET',
+          metaData: 'Restore to device');
+      ProgressDialogUtils.showSuccessToast("Download Started");
 
       await FileDownloader().download(
         task,
         onProgress: (value) {
           if (!value.isNegative) {
-            // progressPer = value;
+            print(value);
+          }
+          if (value == 1.0) {
+            ProgressDialogUtils.showSuccessToast("Download Successful");
+            // FileDownloader().moveToSharedStorage(
+            //   task, SharedStorage.downloads,
+            //   // directory: restoreLocation
+            // );
+            String downloadFilePath = '';
+            task.filePath().then((value) {
+              print(value);
+              downloadFilePath = value;
+            });
+            checkFileExist(fileName, Directory(restoreLocation).path);
+            // moveFile(
+            //     "/storage/emulated/0/Android/data/com.example.safebox/files/hangouts_message.ogg",
+            //     restoreLocation);
+            // filePath = Directory(SharedStorage.downloads)
+            // .rename(Directory(restoreLocation).path);
           }
         },
         onStatus: (status) {},
       );
     } catch (e) {
+      print(e);
       return e;
     }
   }
 
-  _uploadFile(isTemp, directory, files, token, folderId, productId,
-      Function? callBack) async {
+  checkFileExist(filename, destination) async {
+    Directory? filePath = await getExternalStorageDirectory();
+    print(filePath!.path);
+    File sourceFile = File("${filePath.path}/$filename");
+    if (sourceFile.existsSync()) {
+      if (filename.endsWith(".vcf")) {
+        // Directory appDir = await getApplicationDocumentsDirectory();
+        // File file = File('${appDir.path}/contacts.vcf');
+        // // moveFile(sourceFile.path, "$destination/$filename");
+        // await sourceFile.copy(file.path);
+        await extractContact1(sourceFile);
+        // sourceFile.delete();
+
+        print("File is a VCF file");
+      } else if (filename.endsWith(".zip")) {
+        ProgressDialogUtils.showSuccessToast("Extracting Whatsapp files");
+        await ZipFile.extractToDirectory(
+            zipFile: sourceFile, destinationDir: Directory(destination));
+        ProgressDialogUtils.showSuccessToast("Extraction Complete");
+        print("File is a ZIP file");
+      } else {
+        moveFile(sourceFile.path, "$destination/$filename");
+        print("File is neither VCF nor ZIP");
+      }
+    }
+    // return filePath!.path;
+  }
+
+  void moveFile(String sourcePath, String destinationPath) {
     try {
-      MultiUploadTask task = MultiUploadTask(
-          url: baseUrl,
-          files: files,
-          fields: folderId == null
-              ? {"productId": productId}
-              : {"parent_id": folderId.toString(), "productId": productId},
-          updates: Updates.statusAndProgress,
-          requiresWiFi: false,
-          retries: 5,
-          httpRequestMethod: 'POST',
-          directory: directory,
-          baseDirectory: isTemp
-              ? BaseDirectory.temporary
-              : BaseDirectory.applicationDocuments,
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer $token'
-          });
+      // Create a File object for the source file
+      File sourceFile = File(sourcePath);
 
-      await FileDownloader().upload(
-        task,
-        onProgress: (progress) {
-          progressUpdate.value = progress * 100;
+      // Check if the source file exists
+      if (sourceFile.existsSync()) {
+        // Create a File object for the destination file
+        File destinationFile = File(destinationPath);
 
-          if (progressUpdate.value == 100 && totalbatchSize > 1) {
-            if (totalUploadCount > totalUploadLength.value) {
-              totalUploadLength.value += chunkSizeUpdate;
-            }
-          }
-        },
-        onStatus: (status) {
-          // trckUploadProgress(task.taskId);
-          // print(status);
-          // if () {
-
-          // }
-        },
-      );
-      // result.
-      if (progressUpdate.value == 100 && totalbatchSize == 1) {
-        accountController.refreshProfile();
-        ProgressDialogUtils.showSuccessToast("Uploaded successfully");
-      }
-      if (progressUpdate.value == 100 && totalbatchSize > 1) {
-        if (totalUploadCount > totalUploadSize ||
-            totalUploadCount == totalUploadSize) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString(backUpDateKey, backUpDateString);
-        }
-        accountController.refreshProfile();
-        ProgressDialogUtils.showSuccessToast("Backed up successfully");
-      }
-      if (callBack != null) {
-        callBack();
+        // Move the file to the destination directory
+        sourceFile.renameSync(destinationFile.path);
+        print('File moved successfully.');
+      } else {
+        print('Source file does not exist.');
       }
     } catch (e) {
-      return e;
+      print('Error moving file: $e');
+      // Handle the error here (e.g., show an error message to the user)
+    }
+  }
+
+  // Future<File> moveFile(File sourceFile, String newPath) async {
+  //   try {
+  //     // prefer using rename as it is probably faster
+  //     return await sourceFile.rename(newPath);
+  //   } on FileSystemException catch (e) {
+  //     // if rename fails, copy the source file and then delete it
+  //     final newFile = await sourceFile.copy(newPath);
+  //     await sourceFile.delete();
+  //     return newFile;
+  //   }
+  // }
+
+  _uploadFile(isTemp, directory, files, token, folderId, productId,
+      Function? callBack) async {
+    if ((ProgressDialogUtils.getSizeComparableValue(
+                    accountController.accountModelObj.value.usedStorage) +
+                totalUploadSize) ==
+            ProgressDialogUtils.getSizeComparableValue(
+                accountController.accountModelObj.value.totalStorage) ||
+        (ProgressDialogUtils.getSizeComparableValue(
+                    accountController.accountModelObj.value.usedStorage) +
+                totalUploadSize) >
+            ProgressDialogUtils.getSizeComparableValue(
+                accountController.accountModelObj.value.totalStorage)) {
+      Get.dialog(const AlertDialog(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        content: UpgradePlanDialog(),
+      ));
+    } else {
+      try {
+        MultiUploadTask task = MultiUploadTask(
+            url: baseUrl,
+            files: files,
+            fields: folderId == null
+                ? {"productId": productId}
+                : {"parent_id": folderId.toString(), "productId": productId},
+            updates: Updates.statusAndProgress,
+            requiresWiFi: false,
+            retries: 5,
+            httpRequestMethod: 'POST',
+            directory: directory,
+            baseDirectory: isTemp
+                ? BaseDirectory.temporary
+                : BaseDirectory.applicationDocuments,
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token'
+            });
+
+        await FileDownloader().upload(
+          task,
+          onProgress: (progress) {
+            progressUpdate.value = progress * 100;
+
+            if (progressUpdate.value == 100 && totalbatchSize > 1) {
+              if (totalUploadCount > totalUploadLength.value) {
+                totalUploadLength.value += chunkSizeUpdate;
+              }
+            }
+          },
+          onStatus: (status) {
+            // trckUploadProgress(task.taskId);
+            // print(status);
+            // if () {
+
+            // }
+          },
+        );
+        // result.
+        if (progressUpdate.value == 100 && totalbatchSize == 1) {
+          accountController.refreshProfile(true);
+          ProgressDialogUtils.showSuccessToast("Uploaded successfully");
+        }
+        if (progressUpdate.value == 100 && totalbatchSize > 1) {
+          if (totalUploadCount > totalUploadSize ||
+              totalUploadCount == totalUploadSize) {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.setString(backUpDateKey, backUpDateString);
+          }
+          accountController.refreshProfile(true);
+          ProgressDialogUtils.showSuccessToast("Backed up successfully");
+        }
+        if (callBack != null) {
+          callBack();
+        }
+      } catch (e) {
+        return e;
+      }
     }
   }
 
@@ -451,8 +625,6 @@ class Uploadanager extends GetxController {
         totalSize += entity.lengthSync();
       }
     });
-    print(numberOfFiles);
-    print(totalSize / (1024 * 1024));
     return DirStat(numberOfFiles: numberOfFiles, totalSize: totalSize);
   }
 
@@ -566,13 +738,21 @@ class Uploadanager extends GetxController {
     return zipFile;
   }
 
+  restoreContact(List<Contact> contacts) async {
+    for (var contact in contacts) {
+      await FlutterContacts.insertContact(contact);
+    }
+    ProgressDialogUtils.showSuccessToast(
+        "Contacts Restored to device successfully");
+  }
+
   backupContact() async {
     Iterable<Contact> allContacts =
         await FlutterContacts.getContacts(withProperties: true);
     if (allContacts.isNotEmpty) {
       // Create a list of vCard data
       List<String> vCardList = [];
-
+      //  FlutterContacts.insertContact(contact)
       // Convert FlutterContact objects to vCard data
       for (var contact in allContacts) {
         String vCard = contact.toVCard();
@@ -869,22 +1049,25 @@ class Uploadanager extends GetxController {
     }
   }
 
-  void backUpData(bool backupDocs, bool backUpPhotos, bool backUpAudios,
-      bool backUpVideos, bool backUpContacts, bool backUpWhatsappData) async {
-    // Perform backup actions one after the other based on user selected options
-    if (backupDocs) {
-      // Perform backup for documents
-      ProgressDialogUtils.showSuccessToast(" Documents Backup Started");
-      print('Backing up documents...');
-    }
+  void backUpData(
+      // bool backupDocs, bool backUpPhotos, bool backUpAudios,
+      //   bool backUpVideos,
+      bool backUpContacts,
+      bool backUpWhatsappData) async {
+    // // Perform backup actions one after the other based on user selected options
+    // if (backupDocs) {
+    //   // Perform backup for documents
+    //   ProgressDialogUtils.showSuccessToast(" Documents Backup Started");
+    //   print('Backing up documents...');
+    // }
 
-    if (backUpPhotos) {
-      // Perform backup for photos
-      ProgressDialogUtils.showSuccessToast("Photos Backup Started");
+    // if (backUpPhotos) {
+    //   // Perform backup for photos
+    //   ProgressDialogUtils.showSuccessToast("Photos Backup Started");
 
-      print('Backing up photos...');
-      await photosBackUp();
-    }
+    //   print('Backing up photos...');
+    //   await photosBackUp();
+    // }
 
     if (backUpContacts) {
       // Perform backup for contacts
@@ -894,21 +1077,21 @@ class Uploadanager extends GetxController {
       await backUpContact();
     }
 
-    if (backUpAudios) {
-      // Perform backup for audios
-      print('Backing up audios...');
-      ProgressDialogUtils.showSuccessToast("Audios Backup Started");
+    // if (backUpAudios) {
+    //   // Perform backup for audios
+    //   print('Backing up audios...');
+    //   ProgressDialogUtils.showSuccessToast("Audios Backup Started");
 
-      await audioBackUp();
-    }
+    //   await audioBackUp();
+    // }
 
-    if (backUpVideos) {
-      ProgressDialogUtils.showSuccessToast("Videos Backup Started");
+    // if (backUpVideos) {
+    //   ProgressDialogUtils.showSuccessToast("Videos Backup Started");
 
-      // Perform backup for videos
-      print('Backing up videos...');
-      await videosBackUp();
-    }
+    //   // Perform backup for videos
+    //   print('Backing up videos...');
+    //   await videosBackUp();
+    // }
 
     if (backUpWhatsappData) {
       ProgressDialogUtils.showSuccessToast("Whatsapp Backup Started");
@@ -917,6 +1100,51 @@ class Uploadanager extends GetxController {
       print('Backing up WhatsApp data...');
       await backupWhatsapp();
     }
+  }
+
+  Future cacheContacts(bool dbChanged) async {
+    List<String> cachedData = await getContactsFromPrefs();
+    if (cachedData.isEmpty || dbChanged) {
+      print("contact fetching");
+      Iterable<Contact> allContacts =
+          await FlutterContacts.getContacts(withProperties: true);
+      if (allContacts.isNotEmpty) {
+        // Create a list of vCard data
+        List<String> vCardList = [];
+
+        // Convert FlutterContact objects to vCard data
+        for (var contact in allContacts) {
+          String vCard = contact.toVCard();
+          vCardList.add(vCard);
+        }
+        await saveContactsToPrefs(vCardList);
+        print("contact Cached");
+      }
+    }
+  }
+
+  // Function to save vCard strings to SharedPreferences
+  Future<void> saveContactsToPrefs(List<String> vCardList) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('cached_contacts', vCardList);
+  }
+
+  // Function to save vCard strings to SharedPreferences
+  Future<void> saveUploadedContactsToPrefs(List<String> vCardList) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('cached_uploadecontacts', vCardList);
+  }
+
+  // Function to retrieve vCard strings from SharedPreferences
+  Future<List<String>> getContactsFromPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('cached_contacts') ?? [];
+  }
+
+  // Function to retrieve vCard strings from SharedPreferences
+  Future<List<String>> getUploadedContactsFromPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('cached_uploadecontacts') ?? [];
   }
 }
 
