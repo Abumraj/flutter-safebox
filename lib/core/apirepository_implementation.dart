@@ -118,6 +118,32 @@ class ApiRepositoryImplementation implements ApiRepository {
   }
 
   @override
+  Future postPhoneExist(data) async {
+    try {
+      final response = await _httpService.postRequest(
+        "/phone-exist",
+        data,
+      );
+      return response.data;
+    } catch (e) {
+      return 'error'; // return an empty list on exception/error
+    }
+  }
+
+  @override
+  Future postForgotPassword(data) async {
+    try {
+      final response = await _httpService.postRequest(
+        "/forgot-password",
+        data,
+      );
+      return response.data;
+    } catch (e) {
+      return 'error'; // return an empty list on exception/error
+    }
+  }
+
+  @override
   Future postGoogleLogin(data) async {
     try {
       final response = await _httpService.postRequest(
@@ -192,16 +218,17 @@ class ApiRepositoryImplementation implements ApiRepository {
   Future postPhoneVerificationRequest(data) async {
     String termiiUrl = 'https://api.ng.termii.com';
 
-    // try {
-    final response = await dio.post("$termiiUrl/api/sms/otp/send",
+    try {
+      final response = await dio.post(
+        "$termiiUrl/api/sms/otp/send",
         data: data,
-        options: Options(contentType: 'appliction/json', headers: {}));
-    print(response);
-    return response.data;
-    // } catch (e) {
-    //   print(e);
-    //   return 'error'; // return an empty list on exception/error
-    // }
+      );
+      print(response);
+      return response.data;
+    } catch (e) {
+      print(e);
+      return 'error'; // return an empty list on exception/error
+    }
   }
 
   @override
@@ -209,8 +236,10 @@ class ApiRepositoryImplementation implements ApiRepository {
     String termiiUrl = 'https://api.ng.termii.com';
 
     try {
-      final response = await dio.post("$termiiUrl/api/sms/otp/verify",
-          data: data, options: Options(headers: {}));
+      final response = await dio.post(
+        "$termiiUrl/api/sms/otp/verify",
+        data: data,
+      );
       print(response.data);
       return response.data;
     } catch (e) {

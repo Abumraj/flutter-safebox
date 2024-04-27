@@ -420,12 +420,9 @@ class CreateAccountScreen extends GetWidget<CreateAccountController> {
       buttonStyle: CustomButtonStyles.outlinePrimary,
       buttonTextStyle: CustomTextStyles.titleMediumOpenSansWhiteA700SemiBold,
       onPressed: () {
-        // GoogleAuthHelper().verifyPhoneNumber();
-
         if (_formKey.currentState!.validate()) {
           controller.register();
         }
-        // Get.to(VerifyEmailScreen());
       },
     );
   }

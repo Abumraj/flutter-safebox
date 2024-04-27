@@ -41,10 +41,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    FlutterContacts.addListener(() {
-      // dbChanged = true;
-      uploadController.cacheContacts(true);
-    });
+    // FlutterContacts.addListener(() {
+    //   // dbChanged = true;
+    //   uploadController.cacheContacts(true);
+    // });
     _startDelay();
   }
 

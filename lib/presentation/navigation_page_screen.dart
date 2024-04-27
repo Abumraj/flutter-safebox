@@ -2,7 +2,7 @@ import 'package:safebox/controller/account_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
-import 'package:safebox/presentation/data_selection_page_screen.dart';
+import 'package:safebox/presentation/contact_selection_page.dart';
 import 'package:safebox/presentation/referral_overview.dart';
 import 'package:safebox/presentation/settings_screen.dart';
 import 'package:safebox/presentation/storage_page_screen.dart';
@@ -62,7 +62,7 @@ class NavigationPageScreen extends GetWidget<AccountController> {
                           SizedBox(height: 28.v),
                           InkWell(
                             onTap: () {
-                              Get.to(const DataSelectionPageScreen());
+                              Get.to(const CustomContactSelectionScreen());
                             },
                             child: Row(children: [
                               CustomImageView(
@@ -72,7 +72,7 @@ class NavigationPageScreen extends GetWidget<AccountController> {
                                   width: 16.adaptSize),
                               Padding(
                                   padding: EdgeInsets.only(left: 10.h),
-                                  child: Text("lbl_data_selection".tr,
+                                  child: Text("Upload Contacts".tr,
                                       style: theme.textTheme.bodyLarge))
                             ]),
                           ),

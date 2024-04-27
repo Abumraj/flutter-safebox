@@ -86,7 +86,7 @@ class _ReferralOverviewState extends State<ReferralOverview> {
                 width: 294.h,
                 margin: EdgeInsets.symmetric(horizontal: 40.h),
                 child: Text(
-                  "Lorem ipsumis a commonly used placeholder text in the design and typesetting industry",
+                  "Copy your referral code above and share with a new user to input during registration. Your earnings will appear here",
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
                   style: CustomTextStyles.bodySmallBlue800,

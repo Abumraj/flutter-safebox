@@ -11,8 +11,11 @@ import 'package:safebox/widgets/custom_text_form_field.dart';
 
 // ignore_for_file: must_be_immutable
 class ChangePasswordScreen extends GetWidget<AccountController> {
-  ChangePasswordScreen({Key? key}) : super(key: key);
+  ChangePasswordScreen({this.phone, this.isForgotPassword, Key? key})
+      : super(key: key);
   final AccountController accountController = Get.put(AccountController());
+  final String? isForgotPassword;
+  final String? phone;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -36,15 +39,6 @@ class ChangePasswordScreen extends GetWidget<AccountController> {
                       SizedBox(height: 390.v),
                       _buildSaveButton(),
                       SizedBox(height: 60.v),
-                      SizedBox(
-                          height: 517.v,
-                          width: double.maxFinite,
-                          child: Stack(
-                              alignment: Alignment.bottomCenter,
-                              children: [
-                                _buildUploadToSaveboxColumn(),
-                                _buildKeyboards1Column()
-                              ]))
                     ])))));
   }
 
@@ -84,10 +78,18 @@ class ChangePasswordScreen extends GetWidget<AccountController> {
                         width: 16.h))),
             suffixConstraints: BoxConstraints(maxHeight: 50.v),
             validator: (value) {
-              if (value == null ||
-                  (!isValidPassword(value, isRequired: true))) {
-                return "err_msg_please_enter_valid_password".tr;
+              if (isForgotPassword != null) {
+                if (value == null) {
+                  return "err_msg_please_enter_valid_password".tr;
+                }
+              } else {
+                if (value == null ||
+                    (!isValidPassword(value,
+                        isRequired: isForgotPassword == null ? true : false))) {
+                  return "err_msg_please_enter_valid_password".tr;
+                }
               }
+
               return null;
             },
             obscureText: controller.isShowPassword.value,
@@ -173,11 +175,13 @@ class ChangePasswordScreen extends GetWidget<AccountController> {
     return CustomElevatedButton(
         onPressed: () {
           if (_formKey.currentState!.validate()) {
-            controller.updatePassword();
+            isForgotPassword == null
+                ? controller.updatePassword()
+                : controller.forgotPassword();
           }
         },
         height: 50.v,
-        text: "lbl_save".tr,
+        text: isForgotPassword == null ? "lbl_save".tr : "Change Password",
         margin: EdgeInsets.symmetric(horizontal: 30.h),
         buttonStyle: CustomButtonStyles.outlinePrimary,
         buttonTextStyle: CustomTextStyles.titleMediumOpenSansWhiteA700SemiBold);

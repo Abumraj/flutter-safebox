@@ -1,11 +1,12 @@
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:safebox/controller/create_account_controller.dart';
 import 'package:safebox/controller/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:safebox/core/utils/validation_functions.dart';
-import 'package:safebox/presentation/change_password_screen.dart';
 import 'package:safebox/presentation/create_account_screen.dart';
+import 'package:safebox/presentation/forgot_password_screen.dart';
 import 'package:safebox/widgets/custom_checkbox_button.dart';
 import 'package:safebox/widgets/custom_elevated_button.dart';
 import 'package:safebox/widgets/custom_outlined_button.dart';
@@ -59,7 +60,7 @@ class LoginScreen extends GetWidget<LoginController> {
                         child: Text("lbl_email_address2".tr,
                             style: CustomTextStyles.labelLargeSofiaPro)),
                     SizedBox(height: 6.v),
-                    _buildEmailEditText(),
+                    _buildPhoneNumber(),
                     SizedBox(height: 19.v),
                     Align(
                         alignment: Alignment.centerLeft,
@@ -147,19 +148,69 @@ class LoginScreen extends GetWidget<LoginController> {
     );
   }
 
+  // /// Section Widget
+  // Widget _buildEmailEditText() {
+  //   return CustomTextFormField(
+  //       controller: controller.emailEditTextController,
+  //       hintText: "Enter your Email address".tr,
+  //       hintStyle: CustomTextStyles.titleMediumBlue800_1,
+  //       textInputType: TextInputType.emailAddress,
+  //       validator: (value) {
+  //         if (value == null || (!isValidEmail(value, isRequired: true))) {
+  //           return "err_msg_please_enter_valid_email".tr;
+  //         }
+  //         return null;
+  //       });
+  // }
+
   /// Section Widget
-  Widget _buildEmailEditText() {
-    return CustomTextFormField(
-        controller: controller.emailEditTextController,
-        hintText: "Enter your Email address".tr,
-        hintStyle: CustomTextStyles.titleMediumBlue800_1,
-        textInputType: TextInputType.emailAddress,
-        validator: (value) {
-          if (value == null || (!isValidEmail(value, isRequired: true))) {
-            return "err_msg_please_enter_valid_email".tr;
-          }
-          return null;
-        });
+  Widget _buildPhoneNumber() {
+    return IntlPhoneField(
+      decoration: InputDecoration(
+        hintText: "Enter your phone number",
+        hintStyle: CustomTextStyles.titleMediumBlue800,
+        isDense: true,
+        contentPadding: EdgeInsets.all(17.h),
+        fillColor: appTheme.whiteA700,
+        filled: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5.h),
+          borderSide: BorderSide(
+            color: appTheme.gray40001,
+            width: 1,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5.h),
+          borderSide: BorderSide(
+            color: appTheme.gray40001,
+            width: 1,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5.h),
+          borderSide: BorderSide(
+            color: appTheme.blue800,
+            width: 1,
+          ),
+        ),
+      ),
+      initialCountryCode: 'NG',
+
+      // initialValue: "+234",
+      onCountryChanged: (value) {
+        controller.dialcode.value == value.dialCode;
+        // print(value.dialCode);
+        // controller.phoneNumberController.value = value.dialCode;
+      },
+      controller: controller.emailEditTextController,
+      validator: (p0) {
+        if (!p0!.isValidNumber()) {
+          return "err_msg_please_enter_valid_phone_number".tr;
+        }
+        return null;
+      },
+    );
   }
 
   /// Section Widget
@@ -206,7 +257,7 @@ class LoginScreen extends GetWidget<LoginController> {
               }))),
       GestureDetector(
           onTap: () {
-            Get.to(ChangePasswordScreen());
+            Get.to(const ForgotPassword());
           },
           child: Text("msg_forgot_password".tr,
               style: CustomTextStyles.bodySmallBlue800_1))

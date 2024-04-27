@@ -1,9 +1,5 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/contact.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:safebox/core/apirepository_implementation.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/upload_manager.dart';
@@ -47,9 +43,7 @@ class _FilesPageScreenState extends State<FilesPageScreen> {
   }
 
   intiateFileCall() {
-    widget.title.toLowerCase() == "contacts"
-        ? contactDisplay()
-        : recentFilesCall();
+    recentFilesCall();
   }
 
   void recentFilesCall() {
@@ -73,36 +67,39 @@ class _FilesPageScreenState extends State<FilesPageScreen> {
     _scrollController.addListener(_onScroll);
   }
 
-  void contactDisplay() async {
-    setState(() {
-      isLoading = true;
-    });
-    // await uploadController.extractContact1().then((_) {});
-    var data = await uploadController.getUploadedContactsFromPrefs();
-    contacts = uploadController.convertVcardToContactList(data);
-    // var data = await FlutterContacts.getContacts();
+  // void contactDisplay() async {
+  //   setState(() {
+  //     isLoading = true;
+  //   });
+  //   // await uploadController.extractContact1().then((_) {});
+  //   var data = await uploadController.getUploadedContactsFromPrefs();
+  //   var listContacts = uploadController.convertVcardToContactList(data);
+  //   // var data = await FlutterContacts.getContacts();
 
-    // Perform the heavy computation in a separate isolate
-    if (contacts.isEmpty) {
-      await _apiRepositoryImplementation
-          .getFilesByType(widget.title, 1)
-          .then((value) async {
-        await _apiRepositoryImplementation
-            .getDownloadUrl(value.items.first.id!)
-            .then((url) {
-          uploadController.downloadFile(
-              value.items.first.name, url, "restoreLocation");
-        });
-      });
-      await uploadController.extractContact().then((value) {
-        // contacts.addAll(value);
-      });
-    }
+  //   // Perform the heavy computation in a separate isolate
+  //   if (listContacts.isEmpty) {
+  //     await _apiRepositoryImplementation
+  //         .getFilesByType(widget.title, 1)
+  //         .then((value) async {
+  //       await _apiRepositoryImplementation
+  //           .getDownloadUrl(value.items.first.id!)
+  //           .then((url) {
+  //         uploadController.downloadFile(
+  //             value.items.first.name, url, "restoreLocation");
+  //       });
+  //     });
+  //     // await uploadController.extractContact().then((value) {
+  //     //   // contacts.addAll(value);
+  //     // });
+  //   }
 
-    setState(() {
-      isLoading = false;
-    });
-  }
+  //   setState(() {
+  //     contacts = listContacts
+  //         .where((element) => element.displayName.isNotEmpty)
+  //         .toList();
+  //     isLoading = false;
+  //   });
+  // }
 
 // // Function to be run in a separate isolate
 //   Future<List<Contact>> extractContactInBackground(_) async {
@@ -316,100 +313,25 @@ class _FilesPageScreenState extends State<FilesPageScreen> {
                                       item.updatedAt!.year,
                                       item.updatedAt!.month,
                                       item.updatedAt!.day)))
-                              : contacts.isNotEmpty && !isLoading
-                                  ? ListView.builder(
-                                      physics: const ScrollPhysics(),
-                                      shrinkWrap: true,
-                                      itemCount: contacts.length,
-                                      itemBuilder: (context, index) {
-                                        Contact contact = contacts[index];
-                                        bool isContactSelected =
-                                            selectedContacts.contains(contact);
-
-                                        return ListTile(
-                                          leading: CircleAvatar(
-                                            backgroundColor: appTheme.blue800,
-                                            child: Text(
-                                              contact.displayName.characters
-                                                      .first
-                                                      .toUpperCase()
-                                                      .toString() +
-                                                  contact.displayName.characters
-                                                      .elementAt(1)
-                                                      .toUpperCase()
-                                                      .toString(),
-                                              style: const TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ),
-                                          title: Text(
-                                            contact.displayName.toString(),
-                                            style: theme.textTheme.bodyLarge,
-                                          ),
-                                          // subtitle: Text(contact.phones.first.number.isNotEmpty
-                                          //     ? contact.phones.first.number
-                                          //     : ""),
-                                          trailing: Checkbox(
-                                            value: isContactSelected,
-                                            visualDensity: const VisualDensity(
-                                              vertical: -4,
-                                              horizontal: -4,
-                                            ),
-                                            // overlayColor: ,
-                                            checkColor: appTheme.blue800,
-
-                                            activeColor: appTheme.blue800,
-                                            fillColor: MaterialStateProperty
-                                                .resolveWith<Color>(
-                                                    (Set<MaterialState>
-                                                        states) {
-                                              if (states.contains(
-                                                  MaterialState.disabled)) {
-                                                return Colors.white
-                                                    .withOpacity(.32);
-                                              }
-                                              return Colors.white;
-                                            }),
-                                            onChanged: (value) {
-                                              setState(() {
-                                                if (value != null && value) {
-                                                  print(value);
-                                                  // setState(() {
-                                                  selectedContacts.add(contact);
-                                                  // isSelected[index] == true;
-                                                  // });
-                                                } else {
-                                                  // setState(() {
-                                                  selectedContacts
-                                                      .remove(contact);
-                                                  // isSelected[index] == false;
-                                                  // });
-                                                }
-                                              });
-                                            },
-                                          ),
-                                        );
-                                      },
-                                    )
-                                  : SingleChildScrollView(
-                                      padding: EdgeInsets.only(top: 256.v),
-                                      child: Column(children: [
-                                        CustomImageView(
-                                            imagePath:
-                                                ImageConstant.imgFolderGray200,
-                                            height: 47.adaptSize,
-                                            width: 47.adaptSize),
-                                        SizedBox(height: 14.v),
-                                        SizedBox(
-                                            width: 246.h,
-                                            child: Text(
-                                                "You have no ${widget.title} here yet.",
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                textAlign: TextAlign.center,
-                                                style: CustomTextStyles
-                                                    .titleLargeOpenSansGray40001)),
-                                      ]))
+                              : SingleChildScrollView(
+                                  padding: EdgeInsets.only(top: 256.v),
+                                  child: Column(children: [
+                                    CustomImageView(
+                                        imagePath:
+                                            ImageConstant.imgFolderGray200,
+                                        height: 47.adaptSize,
+                                        width: 47.adaptSize),
+                                    SizedBox(height: 14.v),
+                                    SizedBox(
+                                        width: 246.h,
+                                        child: Text(
+                                            "You have no ${widget.title} here yet.",
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                            style: CustomTextStyles
+                                                .titleLargeOpenSansGray40001)),
+                                  ]))
 
                   // Align(
                   //     alignment: Alignment.centerLeft,

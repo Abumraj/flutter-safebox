@@ -8,9 +8,11 @@ import 'package:safebox/widgets/custom_pin_code_text_field.dart';
 // ignore_for_file: must_be_immutable
 class VerifyEmailScreen extends StatefulWidget {
   final String phoneNumber;
+  final String? isForgotPassword;
   const VerifyEmailScreen({
     super.key,
     required this.phoneNumber,
+    this.isForgotPassword,
   });
 
   @override
@@ -86,8 +88,12 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   () => CustomPinCodeTextField(
                     onComplete: (p0) {
                       print(p0);
+                      print(referenceId);
                       createAccountController.confirmPhoeVerificationCode(
-                          referenceId, p0);
+                          referenceId,
+                          p0,
+                          widget.isForgotPassword != null ? true : false,
+                          widget.phoneNumber);
                     },
                     context: Get.context!,
                     controller: verifyEmailController.otpController.value,
@@ -147,7 +153,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     CustomTextStyles.titleMediumOpenSansWhiteA700SemiBold,
                 onPressed: () {
                   createAccountController.confirmPhoeVerificationCode(
-                      referenceId, verifyEmailController.otpController.value);
+                      referenceId,
+                      verifyEmailController.otpController.value,
+                      widget.isForgotPassword != null ? true : false,
+                      widget.phoneNumber);
                   // Get.to(const GettingStartedScreen());
                 },
               ),

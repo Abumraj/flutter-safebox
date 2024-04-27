@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:safebox/core/apirepository_implementation.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/upload_manager.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
@@ -8,7 +9,8 @@ import 'package:safebox/widgets/app_bar/appbar_title.dart';
 import 'package:safebox/widgets/app_bar/custom_app_bar.dart';
 
 class CustomContactSelectionScreen extends StatefulWidget {
-  const CustomContactSelectionScreen({super.key});
+  final String? restore;
+  const CustomContactSelectionScreen({super.key, this.restore});
 
   @override
   CustomContactSelectionScreenState createState() =>
@@ -17,6 +19,8 @@ class CustomContactSelectionScreen extends StatefulWidget {
 
 class CustomContactSelectionScreenState
     extends State<CustomContactSelectionScreen> {
+  final ApiRepositoryImplementation _apiRepositoryImplementation =
+      Get.put(ApiRepositoryImplementation());
   final Uploadanager uploadController = Get.put(Uploadanager());
 
   List<Contact> selectedContacts = [];
@@ -25,7 +29,7 @@ class CustomContactSelectionScreenState
 
   @override
   void initState() {
-    getContactsFromPhoneBook();
+    widget.restore != null ? contactDisplay() : getContactsFromPhoneBook();
     super.initState();
   }
 
@@ -43,6 +47,39 @@ class CustomContactSelectionScreenState
     // data = await FlutterContacts.getContacts(withProperties: true);
     // contacts = data;
     // contacts.addAll(data.sublist(101, data.length - 1));
+  }
+
+  contactDisplay() async {
+    setState(() {
+      isLoading = true;
+    });
+    // await uploadController.extractContact1().then((_) {});
+    var data = await uploadController.getUploadedContactsFromPrefs();
+    var listContacts = uploadController.convertVcardToContactList(data);
+    // var data = await FlutterContacts.getContacts();
+
+    // Perform the heavy computation in a separate isolate
+    if (listContacts.isEmpty) {
+      await _apiRepositoryImplementation
+          .getFilesByType('Contacts', 1)
+          .then((value) async {
+        await _apiRepositoryImplementation
+            .getDownloadUrl(value.items.first.id!)
+            .then((url) {
+          uploadController.downloadFile(
+              value.items.first.name, url, "restoreLocation");
+        });
+      });
+      // await uploadController.extractContact().then((value) {
+      //   // contacts.addAll(value);
+      // });
+    }
+    setState(() {
+      contacts = listContacts
+          .where((element) => element.displayName.isNotEmpty)
+          .toList();
+      isLoading = false;
+    });
   }
 
   @override
@@ -178,18 +215,31 @@ class CustomContactSelectionScreenState
           TextButton(
               onPressed: () {
                 if (selectedContacts.isNotEmpty) {
-                  uploadController.uploadContact(selectedContacts);
+                  widget.restore != null
+                      ? uploadController.restoreContact(selectedContacts)
+                      : uploadController.uploadContact(selectedContacts);
                   Get.back();
                 } else {
                   ProgressDialogUtils.showFailureToast("No contacts selected");
                 }
               },
               child: Text(
-                "Upload",
-                style: theme.textTheme.headlineMedium!.copyWith(
+                widget.restore != null ? "Restore" : "Upload",
+                style: theme.textTheme.headlineSmall!.copyWith(
                   color: appTheme.indigo900,
                 ),
-              ))
+              )),
+          if (widget.restore == null)
+            IconButton(
+                onPressed: () {
+                  setState(() {
+                    isLoading = true;
+                  });
+                  uploadController.cacheContacts(true).then((value) {
+                    getContactsFromPhoneBook();
+                  });
+                },
+                icon: const Icon(Icons.refresh))
         ]);
   }
 }

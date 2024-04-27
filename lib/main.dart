@@ -39,9 +39,9 @@ void main() async {
     isLoggedIn = value;
     accountController.refreshProfile(false);
   });
-  FlutterContacts.addListener(() {
-    print("Contact changed");
-  });
+  // FlutterContacts.addListener(() {
+  // print("Contact changed");
+  // });
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

@@ -1,5 +1,6 @@
 import 'package:safebox/controller/account_controller.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
+import 'package:safebox/presentation/contact_selection_page.dart';
 import 'package:safebox/presentation/files_page_screen.dart';
 
 import '../controller/added_folder_one_controller.dart';
@@ -31,9 +32,17 @@ class FilescolumnItemWidget extends StatelessWidget {
           child: InkWell(
             onTap: () {
               if (filescolumnItemModelObj.isActive!.value) {
-                Get.to(FilesPageScreen(
-                  title: filescolumnItemModelObj.filesText!.value,
-                ));
+                if (filescolumnItemModelObj.filesText!.value == 'Contacts') {
+                  Get.to(CustomContactSelectionScreen(
+                    restore: filescolumnItemModelObj.filesText!.value,
+                  ));
+                } else {
+                  Get.to(FilesPageScreen(
+                      title: filescolumnItemModelObj.filesText!.value));
+                }
+                // Get.to(FilesPageScreen(
+                // title: filescolumnItemModelObj.filesText!.value,
+                // ));
               } else {
                 ProgressDialogUtils.showFailureToast(
                     "${filescolumnItemModelObj.filesText!.value} upload and back up coming soon");

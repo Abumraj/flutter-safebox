@@ -4,6 +4,7 @@ import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:safebox/domain/googleauth/google_auth_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:safebox/presentation/change_password_screen.dart';
 import 'package:safebox/presentation/getting_started_screen.dart';
 import 'package:safebox/presentation/home_page_screen.dart';
 import 'package:safebox/presentation/verify_email_screen.dart';
@@ -19,7 +20,7 @@ class CreateAccountController extends GetxController {
   // );
   String termiiApiKey =
       'TL5lEKuMU1BWSJUsqivA4dN2RxVT5BZQ5aEu0ja76f7qX8zNdPBAhTLv40WV2Z';
-  String termiiSenderId = 'safebox';
+  String termiiSenderId = 'SafeBox';
   final ApiRepositoryImplementation _apiRepositoryImplementation =
       Get.put(ApiRepositoryImplementation());
   final AccountController _accountController = Get.put(AccountController());
@@ -50,10 +51,8 @@ class CreateAccountController extends GetxController {
   }
 
   Future<String> sendPhoneVrificationCode(destination) async {
-    ProgressDialogUtils.showProgressDialog();
-
     print(destination);
-    String pin = '';
+    ProgressDialogUtils.showProgressDialog();
     var data = {
       'api_key': termiiApiKey,
       'message_type': 'ALPHANUMERIC',
@@ -65,7 +64,7 @@ class CreateAccountController extends GetxController {
       'pin_length': 4,
       "pin_placeholder": "<1234>",
       "message_text":
-          "Thank you for using Safebox. Your verification code is <1234>",
+          "Thanks for using Safebox. Your verification code is <1234>",
       'pin_type': 'NUMERIC'
     };
 
@@ -74,11 +73,12 @@ class CreateAccountController extends GetxController {
       // "to": "2348109077743",
       // "smsStatus": "Message Sent"
     }
-    _apiRepositoryImplementation
+    return _apiRepositoryImplementation
         .postPhoneVerificationRequest(data)
         .then((value) {
-      pin = value['pin'];
-      print(value);
+      ProgressDialogUtils.hideProgressDialog();
+      return value['pinId'];
+      // print(pin);
       // if (value['smsStatus'] == 'Message Sent') {
       //   // await sendPhoneVrificationCode(
       //   //     "${dialcode.value}${phoneNumberController.text}");
@@ -88,9 +88,8 @@ class CreateAccountController extends GetxController {
       //   ProgressDialogUtils.hideProgressDialog();
       // }
     });
-    ProgressDialogUtils.hideProgressDialog();
 
-    return pin;
+    // return pin;
     // await termii.sendToken(
     //     destination: destination,
     //     messageType: MessageType.numeric,
@@ -103,7 +102,8 @@ class CreateAccountController extends GetxController {
     //     pinType: MessageType.numeric);
   }
 
-  confirmPhoeVerificationCode(pinId, pin) async {
+  confirmPhoeVerificationCode(
+      pinId, pin, bool isForgotPassword, String phone) async {
     ProgressDialogUtils.showProgressDialog();
 
     var data = {
@@ -111,25 +111,19 @@ class CreateAccountController extends GetxController {
       'pin_id': pinId,
       'pin': pin,
     };
-
-    {
-      {
-        //  "pinId": "c8dcd048-5e7f-4347-8c89-4470c3af0b",
-        //  "verified": "True",
-        //  "msisdn": "2348109077743"
-      }
-    }
     _apiRepositoryImplementation
         .postConfirmPhoneVerificationcode(data)
         .then((value) {
       if (value['verified'] == true) {
-        // await sendPhoneVrificationCode(
-        //     "${dialcode.value}${phoneNumberController.text}");
-        // ProgressDialogUtils.hideProgressDialog();
-        _apiRepositoryImplementation.getUpdatePhoneVerify();
-        Constants.saveUserLoggedInSharedPreference(true);
-
-        Get.off(const GettingStartedScreen());
+        if (isForgotPassword) {
+          print(phone);
+          _accountController.currentPasswordController.text = phone;
+          Get.to(ChangePasswordScreen(isForgotPassword: 'yes', phone: phone));
+        } else {
+          _apiRepositoryImplementation.getUpdatePhoneVerify();
+          Constants.saveUserLoggedInSharedPreference(true);
+          Get.off(const GettingStartedScreen());
+        }
       } else {
         ProgressDialogUtils.hideProgressDialog();
         ProgressDialogUtils.showFailureToast("Pin Incorrect or expired");
@@ -151,33 +145,32 @@ class CreateAccountController extends GetxController {
       'password_confirmation': passwordController.text,
       'referral_code': referralCodeController.text
     };
-    print(data["phone_number"].toString().characters.length);
     _apiRepositoryImplementation.postRegister(data).then((value) async {
       if (value['message'] == 'you have successfully registered') {
-        // _accountController.refreshProfile(true);
-
-        // await sendPhoneVrificationCode(
-        //     dialcode.value + phoneNumberController.text);
         await Constants.saveUserTokenSharedPreference(value['token']);
+        ProgressDialogUtils.hideProgressDialog();
+        ProgressDialogUtils.showSuccessToast(
+            'Registration Successful. proceed to verify your phone number');
+
         Get.off(VerifyEmailScreen(
           phoneNumber: dialcode.value + phoneNumberController.text,
-          // referenceId: value['pinId'],
         ));
-        // ProgressDialogUtils.hideProgressDialog();
-
-        // Get.off(VerifyEmailScreen(
-        //   phoneNumber: data["phone_number"]!,
-        // ));
+      } else if (value['message'] == 'Email already exist') {
+        ProgressDialogUtils.hideProgressDialog();
+        ProgressDialogUtils.showFailureToast('Email Already Exist');
+      } else if (value['message'] == 'Phone number already exist') {
+        ProgressDialogUtils.hideProgressDialog();
+        ProgressDialogUtils.showFailureToast('Phone Number Already Exist');
       } else {
         ProgressDialogUtils.hideProgressDialog();
+        ProgressDialogUtils.showFailureToast(
+            'An error occurred. Try again later.');
       }
     });
-    // update();
   }
 
   googleLogin(name, email, bool isRegister) {
     ProgressDialogUtils.showProgressDialog();
-    // print(email);
     var data = {
       'name': name,
       'email': email,
@@ -200,5 +193,27 @@ class CreateAccountController extends GetxController {
       }
     });
     // update();
+  }
+
+  phoneExist() async {
+    ProgressDialogUtils.showProgressDialog();
+
+    var data = {
+      'phone_number': dialcode.value + phoneNumberController.text,
+    };
+    _apiRepositoryImplementation.postPhoneExist(data).then((value) async {
+      ProgressDialogUtils.hideProgressDialog();
+
+      print(value);
+      if (value == 'user exist') {
+        Get.to(VerifyEmailScreen(
+          phoneNumber: dialcode.value + phoneNumberController.text,
+          isForgotPassword: 'yes',
+        ));
+      } else {
+        ProgressDialogUtils.hideProgressDialog();
+        ProgressDialogUtils.showFailureToast('Account not found');
+      }
+    });
   }
 }

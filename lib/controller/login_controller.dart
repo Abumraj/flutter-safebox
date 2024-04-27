@@ -22,6 +22,7 @@ class LoginController extends GetxController {
   Rx<LoginModel> loginModelObj = LoginModel().obs;
 
   Rx<bool> isShowPassword = true.obs;
+  Rx<String> dialcode = '234'.obs;
 
   Rx<bool> englishLabel = false.obs;
   Rx<bool> isPasswordEmpty = true.obs;
@@ -36,7 +37,7 @@ class LoginController extends GetxController {
   login() {
     ProgressDialogUtils.showProgressDialog();
     var data = {
-      'email': emailEditTextController.text,
+      'email': dialcode.value + emailEditTextController.text,
       'password': passwordEditTextController.text,
     };
     _apiRepositoryImplementation.postLogin(data).then((value) async {
@@ -47,15 +48,16 @@ class LoginController extends GetxController {
       // print(value);
       if (value['message'] == 'login successful') {
         await Constants.saveUserTokenSharedPreference(value['token']);
-        await Constants.saveUserLoggedInSharedPreference(englishLabel.value);
         _accountController.refreshProfile(true);
         ProgressDialogUtils.hideProgressDialog();
         if (value['is_verified'] == 0) {
-          // Get.off(VerifyEmailScreen(
-          //   phoneNumber: value['phone'],
-          // ));
-          Get.off(const HomePageScreen());
+          Get.off(VerifyEmailScreen(
+            phoneNumber: value['phone'],
+          ));
+          // Get.off(const HomePageScreen());
         } else {
+          await Constants.saveUserLoggedInSharedPreference(englishLabel.value);
+
           Get.off(const HomePageScreen());
         }
       } else if (value['message'] == 'The provided credentials are incorrect') {

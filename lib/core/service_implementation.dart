@@ -44,7 +44,9 @@ class ServiceImplementation implements HttpService {
 
   initializeInterceptors() {
     _dio.interceptors.add(InterceptorsWrapper(
-        onError: (DioException err, ErrorInterceptorHandler handler) {},
+        onError: (DioException err, ErrorInterceptorHandler handler) {
+          print(err.message);
+        },
         onRequest:
             (RequestOptions options, RequestInterceptorHandler handler) {},
         onResponse: (Response response, ResponseInterceptorHandler handler) {
@@ -66,6 +68,8 @@ class ServiceImplementation implements HttpService {
             'Authorization': 'Bearer $token'
           }));
     } on DioException catch (e) {
+      print(e.requestOptions);
+
       throw Exception(e.message);
     }
     return response;
@@ -84,6 +88,7 @@ class ServiceImplementation implements HttpService {
             'Authorization': 'Bearer $token'
           }));
     } on DioException catch (e) {
+      print(e.requestOptions);
       throw Exception(e.message);
     }
     return response;

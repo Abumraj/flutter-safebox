@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:safebox/controller/starred_folder_controller.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/upload_manager.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
-import 'package:safebox/presentation/contact_selection_page.dart';
+import 'package:safebox/presentation/data_selection_page_screen.dart';
 import 'package:safebox/presentation/name_folder_page_dialog.dart';
 
 // ignore: must_be_immutable
@@ -114,12 +113,13 @@ class AddUploadPageBottomsheet extends StatelessWidget {
           SizedBox(height: 28.v),
           InkWell(
             onTap: () async {
-              bool permissionGranted =
-                  await FlutterContacts.requestPermission();
-              if (permissionGranted) {
-                Get.back();
-                Get.to(const CustomContactSelectionScreen());
-              } else {}
+              // bool permissionGranted =
+              //     await FlutterContacts.requestPermission();
+              // if (permissionGranted) {
+              //   Get.back();
+              //   Get.to(const CustomContactSelectionScreen());
+              // } else {}
+              Get.to(const DataSelectionPageScreen());
             },
             child: Padding(
               padding: EdgeInsets.only(left: 11.h),
@@ -134,7 +134,7 @@ class AddUploadPageBottomsheet extends StatelessWidget {
                   Padding(
                     padding: EdgeInsets.only(left: 10.h),
                     child: Text(
-                      "lbl_upload_contacts".tr,
+                      "Back up contacts".tr,
                       style: theme.textTheme.bodyLarge,
                     ),
                   ),

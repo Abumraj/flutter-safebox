@@ -130,6 +130,24 @@ class AccountController extends GetxController {
     update();
   }
 
+  forgotPassword() {
+    ProgressDialogUtils.showProgressDialog();
+    var data = {
+      'current_password': currentPasswordController.text,
+      'password': passwordController.text,
+    };
+    _apiRepositoryImplementation.postForgotPassword(data).then((value) {
+      if (value == "Password changed successfully") {
+        ProgressDialogUtils.hideProgressDialog();
+        ProgressDialogUtils.showSuccessToast("Password changed successfully");
+        Get.off(LoginScreen());
+      } else {
+        ProgressDialogUtils.hideProgressDialog();
+        ProgressDialogUtils.showFailureToast("An Error Occurred");
+      }
+    });
+  }
+
   withDrawalRequest() {
     ProgressDialogUtils.showProgressDialog();
     var data = {

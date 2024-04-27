@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:background_downloader/background_downloader.dart';
 import 'package:disk_space_update/disk_space_update.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_archive/flutter_archive.dart';
@@ -312,7 +311,7 @@ class Uploadanager extends GetxController {
   extractContact1(File importedContact) async {
     // Directory appDir = await getApplicationDocumentsDirectory();
 
-    List<Contact> recoveredContacts = [];
+    // List<Contact> recoveredContacts = [];
     // File importedContact = File("${appDir.path}/contacts.vcf");
 
     if (importedContact.existsSync()) {
@@ -334,9 +333,11 @@ class Uploadanager extends GetxController {
           //   // print(contact.displayName.toString());
           //   recoveredContacts.add(contact);
           // }
-          await saveUploadedContactsToPrefs(vCardList);
         }
       }
+      await saveUploadedContactsToPrefs(vCardList);
+      List<Contact> contacts = convertVcardToContactList(vCardList);
+      restoreContact(contacts);
     }
     // for (var contact in recoveredContacts) {
     //   String vCard = contact.toVCard();
@@ -401,14 +402,15 @@ class Uploadanager extends GetxController {
   }
 
   restoreToDevice(fileName, url) async {
-    ProgressDialogUtils.showSuccessToast("Select Location to store your file");
-
-    selectDirectory().then((value) async {
-      print(fileName);
-      print(url);
-      print(value);
-      await downloadFile(fileName, url, value);
-    });
+    if (fileName.endsWith(".vcf")) {
+      await downloadFile(fileName, url, "value");
+    } else {
+      ProgressDialogUtils.showSuccessToast(
+          "Select Location to store your file");
+      selectDirectory().then((value) async {
+        await downloadFile(fileName, url, value);
+      });
+    }
   }
 //   wa.db.crypt14
 // I/flutter ( 2735): https://safebox.africa/storage/pqeeS9I2HVjfdWoNdUkFPfY0ynJngbXMP2Yh4Jkf.tfm
@@ -437,19 +439,19 @@ class Uploadanager extends GetxController {
         task,
         onProgress: (value) {
           if (!value.isNegative) {
-            print(value);
+            // print(value);
           }
           if (value == 1.0) {
-            ProgressDialogUtils.showSuccessToast("Download Successful");
+            ProgressDialogUtils.showSuccessToast("Downloaded Successfully");
             // FileDownloader().moveToSharedStorage(
             //   task, SharedStorage.downloads,
             //   // directory: restoreLocation
             // );
-            String downloadFilePath = '';
-            task.filePath().then((value) {
-              print(value);
-              downloadFilePath = value;
-            });
+            // String downloadFilePath = '';
+            // task.filePath().then((value) {
+            //   print(value);
+            //   // downloadFilePath = value;
+            // });
             checkFileExist(fileName, Directory(restoreLocation).path);
             // moveFile(
             //     "/storage/emulated/0/Android/data/com.example.safebox/files/hangouts_message.ogg",
@@ -739,6 +741,7 @@ class Uploadanager extends GetxController {
   }
 
   restoreContact(List<Contact> contacts) async {
+    ProgressDialogUtils.showSuccessToast("Inserting contacts into phone");
     for (var contact in contacts) {
       await FlutterContacts.insertContact(contact);
     }

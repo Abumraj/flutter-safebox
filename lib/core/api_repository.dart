@@ -29,6 +29,8 @@ abstract class ApiRepository {
   Future<dynamic> postRenameFolder(dynamic data);
   Future<dynamic> postUpdateProfile(dynamic data);
   Future<dynamic> postChangePassword(dynamic data);
+  Future<dynamic> postPhoneExist(dynamic data);
+  Future<dynamic> postForgotPassword(dynamic data);
   Future<dynamic> getDeleteFile(dynamic data);
   Future<List<Plan>> getUserPlans();
   Future<UserDetail> getUserDetail(bool refresh);
