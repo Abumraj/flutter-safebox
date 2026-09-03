@@ -2,6 +2,7 @@ import 'package:safebox/controller/account_controller.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:safebox/presentation/contact_selection_page.dart';
 import 'package:safebox/presentation/files_page_screen.dart';
+import 'package:safebox/presentation/sms_page.dart';
 
 import '../controller/added_folder_one_controller.dart';
 import '../models/filescolumn_item_model.dart';
@@ -11,12 +12,15 @@ import 'package:safebox/core/app_export.dart';
 // ignore: must_be_immutable
 class FilescolumnItemWidget extends StatelessWidget {
   FilescolumnItemWidget(
+    this.counter,
+    this.smsCounter,
     this.filescolumnItemModelObj, {
     Key? key,
   }) : super(
           key: key,
         );
-
+  String counter;
+  String smsCounter;
   FilescolumnItemModel filescolumnItemModelObj;
   var controller = Get.find<AddedFolderOneController>();
   final AccountController accountController = Get.put(AccountController());
@@ -36,6 +40,8 @@ class FilescolumnItemWidget extends StatelessWidget {
                   Get.to(CustomContactSelectionScreen(
                     restore: filescolumnItemModelObj.filesText!.value,
                   ));
+                } else if (filescolumnItemModelObj.filesText!.value == 'Sms') {
+                  Get.to(const SmsMessages());
                 } else {
                   Get.to(FilesPageScreen(
                       title: filescolumnItemModelObj.filesText!.value));
@@ -112,7 +118,9 @@ class FilescolumnItemWidget extends StatelessWidget {
       return filescolumnItemModelObj.itemsText!.value =
           "${accountController.accountModelObj.value.audioCount} items";
     } else if (filescolumnItemModelObj.filesText!.value == "Contacts") {
-      return filescolumnItemModelObj.itemsText!.value = "0 items";
+      return filescolumnItemModelObj.itemsText!.value = "$counter items";
+    } else if (filescolumnItemModelObj.filesText!.value == "Sms") {
+      return filescolumnItemModelObj.itemsText!.value = "$smsCounter items";
     } else if (filescolumnItemModelObj.filesText!.value == "Whatsapp") {
       return filescolumnItemModelObj.itemsText!.value =
           "${accountController.accountModelObj.value.whatsappCount} items";

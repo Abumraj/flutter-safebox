@@ -41,12 +41,13 @@ class CreateAccountScreen extends GetWidget<CreateAccountController> {
                     padding: EdgeInsets.only(
                       left: 30.h,
                       right: 30.h,
-                      bottom: 53.v,
+                      top: 20.v,
+                      bottom: 45.v,
                     ),
                     child: Column(
                       children: [
                         CustomImageView(
-                          imagePath: ImageConstant.imgFlag,
+                          imagePath: ImageConstant.imagesafebox3,
                           height: 43.v,
                           width: 35.h,
                         ),
@@ -156,9 +157,9 @@ class CreateAccountScreen extends GetWidget<CreateAccountController> {
                         ),
                         SizedBox(height: 6.v),
                         _buildPassword(),
-                        if (controller.passwordController.text.isNotEmpty)
-                          passwordValidationWidget(
-                              controller.passwordController.text),
+                        // if (controller.passwordController.text.isNotEmpty)
+                        //   passwordValidationWidget(
+                        //       controller.passwordController.text),
                         Align(
                           alignment: Alignment.centerLeft,
                           child: RichText(
@@ -402,8 +403,8 @@ class CreateAccountScreen extends GetWidget<CreateAccountController> {
         ),
         validator: (value) {
           checkPassword = value;
-          if (value == null || (!isValidPassword(value, isRequired: true))) {
-            return "Password must contain at least:".tr;
+          if (value == null || value.length < 8) {
+            return "Password must contain at least 8 character long";
           }
           return null;
         },

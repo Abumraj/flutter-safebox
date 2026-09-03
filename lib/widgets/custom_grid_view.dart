@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/models/userfiles_item_model.dart';
+import 'package:safebox/presentation/contact_selection_page.dart';
 import 'package:safebox/presentation/copy_page_screen.dart';
 import 'package:safebox/presentation/item_option_page_bottomsheet.dart';
 import 'package:safebox/presentation/move_to_my_design_screen.dart';
@@ -38,6 +39,11 @@ class CustomGridView extends StatelessWidget {
               isCopy: isCopy!,
             ));
           }
+        }
+        if (item.name!.endsWith('.vcf')) {
+          Get.to(const CustomContactSelectionScreen(
+            restore: 'retore',
+          ));
         }
       },
       child: SizedBox(

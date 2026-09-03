@@ -4,6 +4,7 @@ import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/upload_manager.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:safebox/models/userfiles_item_model.dart';
+import 'package:safebox/presentation/carousel_slider.dart';
 import 'package:safebox/presentation/navigation_page_screen.dart';
 import 'package:safebox/widgets/app_bar/appbar_trailing_image.dart';
 import 'package:safebox/widgets/app_bar/custom_app_bar.dart';
@@ -63,8 +64,8 @@ class _StarredFilesPageState extends State<StarredFilesPage> {
         hasMore = value.hasMoreItems;
         page = value.currentPage; // Assign the new list directly
         isLoading = false;
-        print(hasMore);
         // print(allFiles.length); // Assign the new list directly
+        uploadController.upgradePopUp();
       });
     });
   }
@@ -77,8 +78,6 @@ class _StarredFilesPageState extends State<StarredFilesPage> {
         hasMore = value.hasMoreItems;
         page = value.currentPage; // Assign the new list directly
         isLoading = false;
-        print(hasMore);
-        // print(allFiles.length); // Assign the new list directly
       });
     });
   }
@@ -98,7 +97,6 @@ class _StarredFilesPageState extends State<StarredFilesPage> {
   void _onScroll() {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
-      print("loadmore");
       _loadMoreItems();
     }
   }
@@ -173,171 +171,214 @@ class _StarredFilesPageState extends State<StarredFilesPage> {
         child: NavigationPageScreen(),
       ),
       body: SizedBox(
-        width: mediaQueryData.size.width,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(top: 3.v),
-          child: Column(
+          width: mediaQueryData.size.width,
+          height: mediaQueryData.size.height,
+          child: Stack(
             children: [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30.h),
-                child: CustomSearchView(
-                  controller: _searchController,
-                  hintText: "msg_search_files_in".tr,
-                  onChanged: (p0) {
-                    setState(() {
-                      searchResult = starredFiles
-                          .where((element) => element.name!
-                              .toLowerCase()
-                              .contains(p0.toLowerCase()))
-                          .toList();
-                      if (p0.isEmpty) {
-                        searchResult = [];
-                      }
-                    });
-                  },
-                ),
-              ),
-              Obx(() {
-                return uploadController.progressUpdate.value != 0.0 ||
-                        uploadController.isPreparingBackUp.value != false
-                    ? BackupProgressindicator(
-                        controller: uploadController,
-                      )
-                    : const SizedBox();
-              }),
-              SizedBox(height: 40.v),
-              CustomRecentFile(
-                  "lbl_starred_files".tr,
-                  sortAscending,
-                  sortdescending,
-                  listGrid,
-                  isGridView,
-                  sortBySizeAscending,
-                  sortBySizedescending,
-                  sortByDatedescending),
-              SizedBox(height: 13.v),
-              isLoading == true
-                  ? const SizedBox(
-                      child: Center(
-                        child: CircularProgressIndicator.adaptive(
-                          strokeWidth: 4,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.blue,
-                            // Colors.white,
+              Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 30.h),
+                    child: CustomSearchView(
+                      controller: _searchController,
+                      hintText: "msg_search_files_in".tr,
+                      onChanged: (p0) {
+                        setState(() {
+                          searchResult = starredFiles
+                              .where((element) => element.name!
+                                  .toLowerCase()
+                                  .contains(p0.toLowerCase()))
+                              .toList();
+                          if (p0.isEmpty) {
+                            searchResult = [];
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                  Obx(() {
+                    return uploadController.progressUpdate.value != 0.0 ||
+                            uploadController.isPreparingBackUp.value != false
+                        ? BackupProgressindicator(
+                            controller: uploadController,
+                          )
+                        : const SizedBox();
+                  }),
+                  SizedBox(height: 40.v),
+                  CustomRecentFile(
+                      "lbl_starred_files".tr,
+                      sortAscending,
+                      sortdescending,
+                      listGrid,
+                      isGridView,
+                      sortBySizeAscending,
+                      sortBySizedescending,
+                      sortByDatedescending),
+                  SizedBox(height: 13.v),
+                  isLoading == true
+                      ? const SizedBox(
+                          child: Center(
+                            child: CircularProgressIndicator.adaptive(
+                              strokeWidth: 4,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.blue,
+                                // Colors.white,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    )
-                  : searchResult.isEmpty && _searchController.text.isNotEmpty
-                      ? SizedBox(
-                          width: 220.h,
-                          child: Text("No Result Found",
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style:
-                                  CustomTextStyles.titleLargeOpenSansGray40001))
-                      : searchResult.isNotEmpty
-                          ? ListView.builder(
-                              shrinkWrap: true,
-                              physics: const ScrollPhysics(),
-                              itemCount: searchResult.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                UserfilesItemModel item = searchResult[index];
+                        )
+                      : searchResult.isEmpty &&
+                              _searchController.text.isNotEmpty
+                          ? SizedBox(
+                              width: 220.h,
+                              child: Text("No Result Found",
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: CustomTextStyles
+                                      .titleLargeOpenSansGray40001))
+                          : searchResult.isNotEmpty
+                              ? ListView.builder(
+                                  shrinkWrap: true,
+                                  controller: _scrollController,
+                                  physics: const ScrollPhysics(),
+                                  itemCount: searchResult.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    UserfilesItemModel item =
+                                        searchResult[index];
 
-                                return CustomListView(
-                                    item: item,
-                                    reloadResource: recentFilesCallBack);
-                              })
-                          : starredFiles.isEmpty
-                              ? SizedBox(
-                                  width: 220.h,
-                                  child: Text("msg_you_have_no_files".tr,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.center,
-                                      style: CustomTextStyles
-                                          .titleLargeOpenSansGray40001))
-                              : isGridView == true
-                                  ? GroupedListView.list(
-                                      items: starredFiles,
-                                      physics: const ScrollPhysics(),
-                                      headerBuilder: (context, DateTime index) {
-                                        return Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Padding(
-                                            padding: EdgeInsets.only(
-                                                left: 30.h, bottom: 10.h),
-                                            child: Text(
-                                              ProgressDialogUtils
-                                                  .formatDateTime(index),
-                                              style: theme.textTheme.bodyMedium,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      listItemBuilder: (context,
-                                          int count,
-                                          int itemIndex,
-                                          UserfilesItemModel item,
-                                          int index) {
-                                        if (index == starredFiles.length - 1 &&
-                                            hasMore) {
-                                          return _buildLoadingIndicator();
-                                        }
-                                        return CustomListView(
-                                          item: item,
-                                          reloadResource: recentFilesCallBack,
-                                        );
-                                      },
-                                      itemGrouper: ((item) => DateTime(
-                                          item.updatedAt!.year,
-                                          item.updatedAt!.month,
-                                          item.updatedAt!.day)))
-                                  : GroupedListView.grid(
-                                      items: starredFiles,
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      headerBuilder: (context, DateTime index) {
-                                        return Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Padding(
-                                            padding: EdgeInsets.only(
-                                                left: 30.h, bottom: 10.h),
-                                            child: Text(
-                                              ProgressDialogUtils
-                                                  .formatDateTime(index),
-                                              style: theme.textTheme.bodyMedium,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      gridItemBuilder: (context,
-                                          int count,
-                                          int itemIndex,
-                                          UserfilesItemModel item,
-                                          int index) {
-                                        if (index == starredFiles.length - 1 &&
-                                            hasMore) {
-                                          return _buildLoadingIndicator();
-                                        }
-                                        return CustomGridView(
-                                          item: item,
-                                          reloadResource: recentFilesCallBack,
-                                        );
-                                      },
-                                      crossAxisCount: 2,
-                                      itemGrouper: ((item) {
-                                        return DateTime(
-                                            item.updatedAt!.year,
-                                            item.updatedAt!.month,
-                                            item.updatedAt!.day);
-                                      }),
+                                    return CustomListView(
+                                        item: item,
+                                        reloadResource: recentFilesCallBack);
+                                  })
+                              : starredFiles.isEmpty
+                                  ? Center(
+                                      child: SizedBox(
+                                          width: 220.h,
+                                          child: Text(
+                                              "msg_you_have_no_files".tr,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              textAlign: TextAlign.center,
+                                              style: CustomTextStyles
+                                                  .titleLargeOpenSansGray40001)),
                                     )
+                                  : isGridView == true
+                                      ? Expanded(
+                                          child: SingleChildScrollView(
+                                            controller: _scrollController,
+                                            child: GroupedListView.list(
+                                                items: starredFiles,
+                                                physics: const ScrollPhysics(),
+                                                headerBuilder:
+                                                    (context, DateTime index) {
+                                                  return Align(
+                                                    alignment:
+                                                        Alignment.centerLeft,
+                                                    child: Padding(
+                                                      padding: EdgeInsets.only(
+                                                          left: 30.h,
+                                                          bottom: 10.h),
+                                                      child: Text(
+                                                        ProgressDialogUtils
+                                                            .formatDateTime(
+                                                                index),
+                                                        style: theme.textTheme
+                                                            .bodyMedium,
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                                listItemBuilder: (context,
+                                                    int count,
+                                                    int itemIndex,
+                                                    UserfilesItemModel item,
+                                                    int index) {
+                                                  if (index ==
+                                                          starredFiles.length -
+                                                              1 &&
+                                                      hasMore) {
+                                                    return _buildLoadingIndicator();
+                                                  }
+                                                  return CustomListView(
+                                                    item: item,
+                                                    reloadResource:
+                                                        recentFilesCallBack,
+                                                  );
+                                                },
+                                                itemGrouper: ((item) =>
+                                                    DateTime(
+                                                        item.updatedAt!.year,
+                                                        item.updatedAt!.month,
+                                                        item.updatedAt!.day))),
+                                          ),
+                                        )
+                                      : Expanded(
+                                          child: SingleChildScrollView(
+                                            controller: _scrollController,
+                                            child: GroupedListView.grid(
+                                              items: starredFiles,
+                                              physics:
+                                                  const NeverScrollableScrollPhysics(),
+                                              headerBuilder:
+                                                  (context, DateTime index) {
+                                                return Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: 30.h,
+                                                        bottom: 10.h),
+                                                    child: Text(
+                                                      ProgressDialogUtils
+                                                          .formatDateTime(
+                                                              index),
+                                                      style: theme
+                                                          .textTheme.bodyMedium,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              gridItemBuilder: (context,
+                                                  int count,
+                                                  int itemIndex,
+                                                  UserfilesItemModel item,
+                                                  int index) {
+                                                if (index ==
+                                                        starredFiles.length -
+                                                            1 &&
+                                                    hasMore) {
+                                                  return _buildLoadingIndicator();
+                                                }
+                                                return CustomGridView(
+                                                  item: item,
+                                                  reloadResource:
+                                                      recentFilesCallBack,
+                                                );
+                                              },
+                                              crossAxisCount: 2,
+                                              itemGrouper: ((item) {
+                                                return DateTime(
+                                                    item.updatedAt!.year,
+                                                    item.updatedAt!.month,
+                                                    item.updatedAt!.day);
+                                              }),
+                                            ),
+                                          ),
+                                        )
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    bottom: 20.0, right: 10.0, left: 10.0),
+                child: Align(
+                  alignment: AlignmentDirectional.bottomCenter,
+                  child: Imageslide(),
+                ),
+              )
             ],
-          ),
-        ),
-      ),
+          )),
     );
   }
 

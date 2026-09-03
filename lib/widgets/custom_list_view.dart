@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/models/userfiles_item_model.dart';
+import 'package:safebox/presentation/contact_selection_page.dart';
 import 'package:safebox/presentation/item_option_page_bottomsheet.dart';
 import 'package:safebox/presentation/move_to_my_design_screen.dart';
 import 'package:safebox/widgets/app_bar/appbar_leading_image.dart';
@@ -24,6 +25,11 @@ class CustomListView extends StatelessWidget {
             path: item.path!,
             folderId: item.id!,
             name: item.name!,
+          ));
+        }
+        if (item.name!.endsWith('.vcf')) {
+          Get.to(const CustomContactSelectionScreen(
+            restore: 'retore',
           ));
         }
       },

@@ -90,35 +90,38 @@ class CustomSearchView extends StatelessWidget {
           decoration: decoration,
           validator: validator,
           onChanged: (String value) {
-            onChanged!.call(value);
+            onChanged?.call(value);
           },
         ),
       );
+
   InputDecoration get decoration => InputDecoration(
         hintText: hintText ?? "",
         hintStyle: hintStyle ?? CustomTextStyles.titleMediumGray40001,
         prefixIcon: Padding(
-          padding: EdgeInsets.all(
-            15.h,
-          ),
-          // child: Icon(
-          //   Icons.search,
-          //   color: Colors.grey.shade600,
-          // ),
+          padding: EdgeInsets.all(15.h),
         ),
         prefixIconConstraints: prefixConstraints ??
             BoxConstraints(
               maxHeight: 50.v,
             ),
-        suffixIcon: suffix ??
-            Container(
-              margin: EdgeInsets.fromLTRB(30.h, 11.v, 16.h, 11.v),
-              child: CustomImageView(
-                imagePath: ImageConstant.imgEisearch,
-                height: 28.adaptSize,
-                width: 28.adaptSize,
-              ),
-            ),
+        suffixIcon: controller != null && controller!.text.isNotEmpty
+            ? IconButton(
+                icon: Icon(Icons.clear, color: Colors.grey.shade600),
+                onPressed: () {
+                  controller?.clear();
+                  onChanged?.call(""); // Notify listeners of the cleared text
+                },
+              )
+            : suffix ??
+                Container(
+                  margin: EdgeInsets.fromLTRB(30.h, 11.v, 16.h, 11.v),
+                  child: CustomImageView(
+                    imagePath: ImageConstant.imgEisearch,
+                    height: 28.adaptSize,
+                    width: 28.adaptSize,
+                  ),
+                ),
         suffixIconConstraints: suffixConstraints ??
             BoxConstraints(
               maxHeight: 50.v,

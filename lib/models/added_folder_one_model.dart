@@ -11,8 +11,13 @@ class AddedFolderOneModel {
 
   Rx<List<FilescolumnItemModel>> filescolumnItemList = Rx([
     FilescolumnItemModel(
-        userImage: ImageConstant.imgUser.obs,
+        userImage: ImageConstant.imgMenuBlue800.obs,
         filesText: "Contacts".obs,
+        isActive: true.obs,
+        itemsText: "0 item".obs),
+    FilescolumnItemModel(
+        userImage: ImageConstant.imgUser.obs,
+        filesText: "Sms".obs,
         isActive: true.obs,
         itemsText: "0 item".obs),
     FilescolumnItemModel(
@@ -23,48 +28,48 @@ class AddedFolderOneModel {
     FilescolumnItemModel(
         userImage: ImageConstant.imgMenuBlue800.obs,
         filesText: "Files".obs,
-        isActive: false.obs,
+        isActive: true.obs,
         itemsText: "0 items".obs),
     FilescolumnItemModel(
         userImage: ImageConstant.imgIcBaselineInsertPhoto.obs,
         filesText: "Photos".obs,
-        isActive: false.obs,
+        isActive: true.obs,
         itemsText: "0 items".obs),
     FilescolumnItemModel(
         userImage: ImageConstant.imgVideoCamera.obs,
         filesText: "Videos".obs,
-        isActive: false.obs,
+        isActive: true.obs,
         itemsText: "0 item".obs),
     FilescolumnItemModel(
         userImage: ImageConstant.imgAntDesignAudioFilledPurple400.obs,
         filesText: "Audios".obs,
-        isActive: false.obs,
+        isActive: true.obs,
         itemsText: "0 item".obs),
   ]);
 
-  AddedFolderOneModel() {
-    // Initialize the observables after the controller is ready
-    filescolumnItemList.value.forEach((item) {
-      if (item.filesText!.value == "Files") {
-        item.itemsText!.value =
-            "${accountController.accountModelObj.value.documentCount} items";
-      } else if (item.filesText!.value == "Photos") {
-        item.itemsText!.value =
-            "${accountController.accountModelObj.value.photoCount} items";
-      } else if (item.filesText!.value == "Videos") {
-        item.itemsText!.value =
-            "${accountController.accountModelObj.value.videoCount} items";
-      } else if (item.filesText!.value == "Audios") {
-        item.itemsText!.value =
-            "${accountController.accountModelObj.value.audioCount} items";
-      } else if (item.filesText!.value == "Contacts") {
-        item.itemsText!.value = "0 item";
-      } else if (item.filesText!.value == "Whatsapp") {
-        item.itemsText!.value =
-            "${accountController.accountModelObj.value.whatsappCount} items";
-      }
-    });
-  }
+  // AddedFolderOneModel() {
+  //   // Initialize the observables after the controller is ready
+  //   filescolumnItemList.value.forEach((item) {
+  //     if (item.filesText!.value == "Files") {
+  //       item.itemsText!.value =
+  //           "${accountController.accountModelObj.value.documentCount} items";
+  //     } else if (item.filesText!.value == "Photos") {
+  //       item.itemsText!.value =
+  //           "${accountController.accountModelObj.value.photoCount} items";
+  //     } else if (item.filesText!.value == "Videos") {
+  //       item.itemsText!.value =
+  //           "${accountController.accountModelObj.value.videoCount} items";
+  //     } else if (item.filesText!.value == "Audios") {
+  //       item.itemsText!.value =
+  //           "${accountController.accountModelObj.value.audioCount} items";
+  //     } else if (item.filesText!.value == "Contacts") {
+  //       item.itemsText!.value = "0 item";
+  //     } else if (item.filesText!.value == "Whatsapp") {
+  //       item.itemsText!.value =
+  //           "${accountController.accountModelObj.value.whatsappCount} items";
+  //     }
+  //   });
+  // }
 
   Rx<List<MydesignsItemModel>> mydesignsItemList = Rx([
     MydesignsItemModel(

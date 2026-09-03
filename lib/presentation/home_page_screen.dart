@@ -4,12 +4,16 @@ import 'package:safebox/core/app_export.dart';
 import 'package:safebox/presentation/account_screen.dart';
 import 'package:safebox/presentation/add_upload_page_bottomsheet.dart';
 import 'package:safebox/presentation/added_folder_one_page.dart';
+import 'package:safebox/presentation/notepad.dart';
+import 'package:safebox/presentation/sms_page.dart';
 import 'package:safebox/presentation/starred_files_page.dart';
 import 'package:safebox/presentation/starred_folder_page.dart';
 
 // ignore_for_file: must_be_immutable
 class HomePageScreen extends StatefulWidget {
-  const HomePageScreen({Key? key})
+  final bool? isFirstLogin;
+
+  const HomePageScreen({Key? key, this.isFirstLogin})
       : super(
           key: key,
         );
@@ -23,10 +27,12 @@ class _HomePageScreenState extends State<HomePageScreen> {
   StarredFolderController controller = Get.put(StarredFolderController());
   int currentTab = 0;
   List<Widget> screens = [
-    const StarredFolderPage(),
     const AddedFolderOnePage(),
+    const StarredFolderPage(),
     const StarredFilesPage(),
-    AccountScreen()
+    AccountScreen(),
+    const SmsMessages(),
+    const Notepad(),
   ];
 
   @override
@@ -70,7 +76,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
                       minWidth: 40,
                       onPressed: () {
                         setState(() {
-                          currentPage = const StarredFolderPage();
+                          currentPage = const AddedFolderOnePage();
+
                           currentTab = 0;
                         });
                       },
@@ -106,7 +113,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                       onPressed: () {
                         setState(() {
                           currentTab = currentTab = 1;
-                          currentPage = AddedFolderOnePage();
+                          currentPage = const StarredFolderPage();
                         });
                       },
                       child: Column(
@@ -145,7 +152,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                       minWidth: 40,
                       onPressed: () {
                         setState(() {
-                          currentPage = StarredFilesPage();
+                          currentPage = const StarredFilesPage();
                           currentTab = 2;
                         });
                       },

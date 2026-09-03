@@ -8,6 +8,7 @@ import 'package:safebox/models/userfiles_item_model.dart';
 
 abstract class ApiRepository {
   Future<dynamic> postLogin(dynamic data);
+  Future<dynamic> getTermiiSenderId();
   Future<dynamic> postRegister(dynamic data);
   Future<dynamic> postGoogleLogin(dynamic data);
   // Future<dynamic> postGoogleLogin(dynamic data);

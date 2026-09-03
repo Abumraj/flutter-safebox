@@ -403,7 +403,6 @@ class _FilesPageScreenState extends State<FilesPageScreen> {
   //           })));
   // }
 
-  /// Section Widget
   Widget _buildFloatingActionButton() {
     return CustomFloatingButton(
         onTap: () {

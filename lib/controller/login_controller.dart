@@ -1,6 +1,7 @@
 import 'package:safebox/controller/account_controller.dart';
 import 'package:safebox/core/apirepository_implementation.dart';
 import 'package:safebox/core/app_export.dart';
+import 'package:safebox/core/upload_manager.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:safebox/models/login_model.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class LoginController extends GetxController {
   final ApiRepositoryImplementation _apiRepositoryImplementation =
       Get.put(ApiRepositoryImplementation());
   final AccountController _accountController = Get.put(AccountController());
+  final Uploadanager _uploadManager = Get.put(Uploadanager());
   TextEditingController emailEditTextController = TextEditingController();
 
   TextEditingController passwordEditTextController = TextEditingController();
@@ -50,6 +52,7 @@ class LoginController extends GetxController {
         await Constants.saveUserTokenSharedPreference(value['token']);
         _accountController.refreshProfile(true);
         ProgressDialogUtils.hideProgressDialog();
+        _uploadManager.saveContactsToPrefs(['']);
         if (value['is_verified'] == 0) {
           Get.off(VerifyEmailScreen(
             phoneNumber: value['phone'],
@@ -58,7 +61,9 @@ class LoginController extends GetxController {
         } else {
           await Constants.saveUserLoggedInSharedPreference(englishLabel.value);
 
-          Get.off(const HomePageScreen());
+          Get.off(const HomePageScreen(
+            isFirstLogin: true,
+          ));
         }
       } else if (value['message'] == 'The provided credentials are incorrect') {
         ProgressDialogUtils.hideProgressDialog();

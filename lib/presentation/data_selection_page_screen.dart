@@ -23,12 +23,13 @@ class _DataSelectionPageScreenState extends State<DataSelectionPageScreen> {
   GettingStartedModel controller = Get.put(GettingStartedModel());
 
   List<FileoptionsItemModel> fileoptionsItemList = [
-    // FileoptionsItemModel(id: 1, productName: 'Documents'),
-    // FileoptionsItemModel(id: 2, productName: 'Photos'),
-    // FileoptionsItemModel(id: 3, productName: 'Audios'),
-    // FileoptionsItemModel(id: 4, productName: 'Videos'),
+    FileoptionsItemModel(id: 1, productName: 'Documents'),
+    FileoptionsItemModel(id: 2, productName: 'Photos'),
+    FileoptionsItemModel(id: 3, productName: 'Audios'),
+    FileoptionsItemModel(id: 4, productName: 'Videos'),
     FileoptionsItemModel(id: 5, productName: 'Contacts'),
     FileoptionsItemModel(id: 6, productName: 'Whatsapp'),
+    FileoptionsItemModel(id: 7, productName: 'Sms Message'),
   ];
   bool isLoading = false;
   List<bool> backupOptions = [];
@@ -65,13 +66,13 @@ class _DataSelectionPageScreenState extends State<DataSelectionPageScreen> {
                       CustomElevatedButton(
                         onPressed: () {
                           uploadController.backUpData(
-                              controller.backupOptions[0],
-                              controller.backupOptions[1]
-                              // controller.backupOptions[2],
-                              // controller.backupOptions[3],
-                              // controller.backupOptions[4],
-                              // controller.backupOptions[5]
-                              );
+                              backupDocs: controller.backupOptions[0],
+                              backUpPhotos: controller.backupOptions[1],
+                              backUpVideos: controller.backupOptions[2],
+                              backUpAudios: controller.backupOptions[3],
+                              backUpContacts: controller.backupOptions[4],
+                              backUpWhatsappData: controller.backupOptions[5],
+                              backUpSmsMessage: controller.backupOptions[6]);
                           onTapArrowLeft();
                         },
                         height: 50.v,

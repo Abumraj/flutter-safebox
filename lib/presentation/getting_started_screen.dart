@@ -25,12 +25,13 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
   final Uploadanager uploadController = Get.put(Uploadanager());
 
   List<FileoptionsItemModel> fileoptionsItemList = [
-    // FileoptionsItemModel(id: 1, productName: 'Documents'),
-    // FileoptionsItemModel(id: 2, productName: 'Photos'),
-    // FileoptionsItemModel(id: 3, productName: 'Audios'),
-    // FileoptionsItemModel(id: 4, productName: 'Videos'),
+    FileoptionsItemModel(id: 1, productName: 'Documents'),
+    FileoptionsItemModel(id: 2, productName: 'Photos'),
+    FileoptionsItemModel(id: 3, productName: 'Audios'),
+    FileoptionsItemModel(id: 4, productName: 'Videos'),
     FileoptionsItemModel(id: 5, productName: 'Contacts'),
     FileoptionsItemModel(id: 6, productName: 'Whatsapp'),
+    FileoptionsItemModel(id: 7, productName: 'Sms Message'),
   ];
   bool isLoading = false;
   List<bool> backupOptions = [];
@@ -97,14 +98,16 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                       InkWell(
                         onTap: () {
                           uploadController.backUpData(
-                            backupOptions[0],
-                            backupOptions[1],
-                            // backupOptions[2],
-                            // backupOptions[3],
-                            // backupOptions[4],
-                            // backupOptions[5]
-                          );
-                          Get.to(const HomePageScreen());
+                              backupDocs: controller.backupOptions[0],
+                              backUpPhotos: controller.backupOptions[1],
+                              backUpVideos: controller.backupOptions[2],
+                              backUpAudios: controller.backupOptions[3],
+                              backUpContacts: controller.backupOptions[4],
+                              backUpWhatsappData: controller.backupOptions[5],
+                              backUpSmsMessage: controller.backupOptions[6]);
+                          Get.to(const HomePageScreen(
+                            isFirstLogin: true,
+                          ));
                         },
                         child: CustomElevatedButton(
                           height: 50.v,
@@ -121,7 +124,9 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> {
                         buttonTextStyle:
                             CustomTextStyles.titleMediumOpenSansBlue800,
                         onPressed: () {
-                          Get.to(const HomePageScreen());
+                          Get.to(const HomePageScreen(
+                            isFirstLogin: true,
+                          ));
                         },
                       ),
                       SizedBox(height: 10.v),

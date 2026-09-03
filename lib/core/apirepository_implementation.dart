@@ -60,7 +60,7 @@ class ApiRepositoryImplementation implements ApiRepository {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String cacheKey = "userProfile";
     try {
-      if (prefs.containsKey(cacheKey) && !refresh) {
+      if (prefs.containsKey(cacheKey) && refresh == false) {
         final cachedData = prefs.getString(cacheKey)!;
         return UserDetail.fromJson(jsonDecode(cachedData));
       } else {
@@ -240,6 +240,19 @@ class ApiRepositoryImplementation implements ApiRepository {
         "$termiiUrl/api/sms/otp/verify",
         data: data,
       );
+      print(response.data);
+      return response.data;
+    } catch (e) {
+      print(e);
+      return 'error'; // return an empty list on exception/error
+    }
+  }
+
+  @override
+  Future getTermiiSenderId() async {
+    try {
+      final response = await _httpService.getRequest("/termii-key");
+
       print(response.data);
       return response.data;
     } catch (e) {

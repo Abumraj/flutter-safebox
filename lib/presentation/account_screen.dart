@@ -53,6 +53,10 @@ class AccountScreen extends GetWidget<AccountController> {
                   SizedBox(height: 30.v),
                   _buildPhoneNumber(),
                   SizedBox(height: 30.v),
+                  Text(
+                    "To claim referral bonus, enter your account details below.",
+                    style: CustomTextStyles.bodySmallBlue800,
+                  ),
                   _buildAccountName(),
                   SizedBox(height: 30.v),
                   _buildAccountNumber(),

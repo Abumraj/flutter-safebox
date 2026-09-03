@@ -4,6 +4,10 @@ class ImageConstant {
 
   // onboarding screen One images
   static String imgGroup95 = '$imagePath/img_group_95.svg';
+  // slider images
+  static String imgSlider1 = '$imagePath/slider_one.svg';
+  static String imgSlider2 = '$imagePath/slider_two.svg';
+  static String imgSlider3 = '$imagePath/slider_three.svg';
 
   // onboarding screen Two images
   static String imgGroup101 = '$imagePath/img_group_101.svg';
@@ -264,4 +268,7 @@ class ImageConstant {
   static String imgRectangle4178 = '$imagePath/img_rectangle_4178.png';
 
   static String imageNotFound = 'assets/images/image_not_found.png';
+  static String imagesafebox1 = 'assets/images/logo1.png';
+  static String imagesafebox2 = 'assets/images/logo2.png';
+  static String imagesafebox3 = 'assets/images/logo3.png';
 }

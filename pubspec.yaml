@@ -4,14 +4,14 @@ publish_to: 'none'
 version: 0.1.0
 
 environment:
-  sdk: '>=3.1.0 <4.0.0'
+  sdk: '>=3.2.6 <4.0.0'
 
 dependencies:
    flutter: 
     sdk: flutter
    get:
    shared_preferences: 
-   cached_network_image: ^3.3.1 
+   cached_network_image:
    flutter_svg: 
    google_sign_in: 
    pin_code_fields: 
@@ -21,24 +21,36 @@ dependencies:
    dotted_border: 
    intl: 
    dio:
-   intl_phone_field: ^3.2.0
-   fluttertoast: ^8.2.4
-   simple_grouped_listview: ^2.0.0
-   flutter_contacts: ^1.1.7+1
-   file_picker: ^6.1.1
-   background_downloader: ^7.6.0
+   intl_phone_field: 
+   fluttertoast: 
+   simple_grouped_listview: 
+   flutter_contacts: 
+   file_picker: 
+   background_downloader: 
    path_provider:
-   firebase_core: ^2.25.4
+   firebase_core: 
    firebase_auth:
-   percent_indicator: ^4.2.3
-   photo_manager: ^3.0.0-dev.5
-   flutter_archive: ^6.0.0
-   webview_flutter: ^4.7.0
-   disk_space_update: ^0.0.2
+   percent_indicator: 
+   photo_manager: 
+   flutter_archive: 
+   webview_flutter: 
+   disk_space_plus:
+   another_telephony:
+   chat_bubbles: 
+   carousel_slider: 
+   marquee: 
+   permission_handler: ^11.3.1
+
+   
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons:
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path_ios: "assets/images/safeboxicon.png"
   flutter_lints: ^2.0.0
 
 flutter:

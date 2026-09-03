@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/upload_manager.dart';
 import 'package:safebox/presentation/home_page_screen.dart';
@@ -35,6 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
     } else {
       Get.off(const Welcome());
     }
+
     uploadController.cacheContacts(dbChanged);
   }
 
@@ -69,36 +69,55 @@ class _SplashScreenState extends State<SplashScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CustomImageView(
-                  imagePath: ImageConstant.imgFlag,
-                  height: 43.v,
-                  width: 35.h,
+                  imagePath: ImageConstant.imagesafebox2,
+                  height: 250.v,
+                  width: 300.h,
                 ),
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: 9.h,
-                    top: 5.v,
-                    bottom: 4.v,
-                  ),
-                  child: RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "lbl_safe".tr,
-                          style: theme.textTheme.headlineMedium,
-                        ),
-                        TextSpan(
-                          text: "lbl_box".tr,
-                          style: theme.textTheme.displaySmall,
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
+                // Padding(
+                //   padding: EdgeInsets.only(
+                //     left: 9.h,
+                //     top: 5.v,
+                //     bottom: 4.v,
+                //   ),
+                //   child: RichText(
+                //     text: TextSpan(
+                //       children: [
+                //         TextSpan(
+                //           text: "lbl_safe".tr,
+                //           style: theme.textTheme.headlineMedium,
+                //         ),
+                //         TextSpan(
+                //           text: "lbl_box".tr,
+                //           style: theme.textTheme.displaySmall,
+                //         ),
+                //       ],
+                //     ),
+                //     textAlign: TextAlign.left,
+                //   ),
+                // ),
               ],
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        surfaceTintColor: Colors.white,
+        child: Center(
+            child: Column(
+          children: [
+            Text(
+              'By',
+              style: theme.textTheme.labelMedium,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              'Wavefield Limited',
+              style: theme.textTheme.headlineSmall,
+            )
+          ],
+        )),
       ),
     );
   }

@@ -41,7 +41,7 @@ class LoginScreen extends GetWidget<LoginController> {
                   children: [
                     SizedBox(height: 20.h),
                     CustomImageView(
-                        imagePath: ImageConstant.imgFlag,
+                        imagePath: ImageConstant.imagesafebox3,
                         height: 43.v,
                         width: 35.h),
                     SizedBox(height: 17.v),
@@ -68,9 +68,9 @@ class LoginScreen extends GetWidget<LoginController> {
                             style: CustomTextStyles.labelLargeSofiaPro)),
                     SizedBox(height: 6.v),
                     _buildPasswordEditText(),
-                    if (controller.passwordEditTextController.text.isNotEmpty)
-                      passwordValidationWidget(
-                          controller.passwordEditTextController.text),
+                    // if (controller.passwordEditTextController.text.isNotEmpty)
+                    //   passwordValidationWidget(
+                    //       controller.passwordEditTextController.text),
                     SizedBox(height: 10.v),
                     _buildRememberMeRow(),
                     SizedBox(height: 41.v),
@@ -234,8 +234,8 @@ class LoginScreen extends GetWidget<LoginController> {
                     width: 18.adaptSize))),
         suffixConstraints: BoxConstraints(maxHeight: 50.v),
         validator: (value) {
-          if (value == null || (!isValidPassword(value, isRequired: true))) {
-            return "Password must contain at least".tr;
+          if (value == null || value.length < 8) {
+            return "Password must contain at least 8 character long";
           }
           return null;
         },

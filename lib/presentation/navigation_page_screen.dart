@@ -2,10 +2,13 @@ import 'package:safebox/controller/account_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
-import 'package:safebox/presentation/contact_selection_page.dart';
+import 'package:safebox/presentation/app_insight.dart';
+import 'package:safebox/presentation/privacy_policy.dart';
+import 'package:safebox/presentation/refer_earn.dart';
 import 'package:safebox/presentation/referral_overview.dart';
 import 'package:safebox/presentation/settings_screen.dart';
 import 'package:safebox/presentation/storage_page_screen.dart';
+import 'package:safebox/presentation/terms_of_service.dart';
 import 'package:safebox/presentation/upgrade_storage_screen.dart';
 import 'package:safebox/widgets/custom_elevated_button.dart';
 
@@ -32,11 +35,41 @@ class NavigationPageScreen extends GetWidget<AccountController> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(child: _buildPolygonThreeRow()),
-                          SizedBox(height: 39.v),
+                          if (controller.accountModelObj.value.name
+                                  .toString() !=
+                              "null")
+                            _buildPolygonThreeRow(),
+                          SizedBox(height: 20.v),
                           InkWell(
                             onTap: () {
-                              // Get.to(RestoreToDeviceScreen());
+                              Get.to(StoragePageScreen());
+                            },
+                            child: _buildCiSettingsFilled(
+                                userImage: ImageConstant.imgClarityStorageSolid,
+                                settingsLabel: "lbl_storage".tr),
+                          ),
+                          SizedBox(height: 18.v),
+                          InkWell(
+                            onTap: () {
+                              Get.to(SettingsScreen());
+                            },
+                            child: _buildCiSettingsFilled(
+                                userImage: ImageConstant.imgCiSettingsFilled,
+                                settingsLabel: "lbl_settings".tr),
+                          ),
+                          SizedBox(height: 18.v),
+                          InkWell(
+                            onTap: () {
+                              Get.to(const ReferralOverview());
+                            },
+                            child: _buildCiSettingsFilled(
+                                userImage: ImageConstant.imgCiSettingsFilled,
+                                settingsLabel: "Referrals".tr),
+                          ),
+                          SizedBox(height: 18.v),
+                          InkWell(
+                            onTap: () {
+                              Get.to(AppInsightsPage());
                             },
                             child: Row(children: [
                               CustomImageView(
@@ -46,23 +79,31 @@ class NavigationPageScreen extends GetWidget<AccountController> {
                                   width: 16.adaptSize),
                               Padding(
                                   padding: EdgeInsets.only(left: 10.h),
-                                  child: Text("lbl_restore_files".tr,
+                                  child: Text("App Insight".tr,
                                       style: theme.textTheme.bodyLarge))
                             ]),
                           ),
-                          SizedBox(height: 30.v),
+                          SizedBox(height: 18.v),
                           InkWell(
                             onTap: () {
-                              Get.to(StoragePageScreen());
+                              Get.to(TermsAndConditionsPage());
                             },
-                            child: _buildCiSettingsFilled(
-                                userImage: ImageConstant.imgClarityStorageSolid,
-                                settingsLabel: "lbl_storage".tr),
+                            child: Row(children: [
+                              CustomImageView(
+                                  imagePath:
+                                      ImageConstant.imgIcRoundRestorePage,
+                                  height: 16.adaptSize,
+                                  width: 16.adaptSize),
+                              Padding(
+                                  padding: EdgeInsets.only(left: 10.h),
+                                  child: Text("Terms and Conditions".tr,
+                                      style: theme.textTheme.bodyLarge))
+                            ]),
                           ),
-                          SizedBox(height: 28.v),
+                          SizedBox(height: 18.v),
                           InkWell(
                             onTap: () {
-                              Get.to(const CustomContactSelectionScreen());
+                              Get.to(const PrivacyPolicyPage());
                             },
                             child: Row(children: [
                               CustomImageView(
@@ -72,33 +113,34 @@ class NavigationPageScreen extends GetWidget<AccountController> {
                                   width: 16.adaptSize),
                               Padding(
                                   padding: EdgeInsets.only(left: 10.h),
-                                  child: Text("Upload Contacts".tr,
+                                  child: Text("Privacy Policy".tr,
                                       style: theme.textTheme.bodyLarge))
                             ]),
                           ),
-                          SizedBox(height: 30.v),
+
+                          SizedBox(height: 18.v),
                           InkWell(
                             onTap: () {
-                              Get.to(SettingsScreen());
+                              Get.to(const ReferEarnPage());
                             },
-                            child: _buildCiSettingsFilled(
-                                userImage: ImageConstant.imgCiSettingsFilled,
-                                settingsLabel: "lbl_settings".tr),
+                            child: Row(children: [
+                              CustomImageView(
+                                  imagePath:
+                                      ImageConstant.imgPhSelectionAllFill,
+                                  height: 16.adaptSize,
+                                  width: 16.adaptSize),
+                              Padding(
+                                  padding: EdgeInsets.only(left: 10.h),
+                                  child: Text("Refer and Earn".tr,
+                                      style: theme.textTheme.bodyLarge))
+                            ]),
                           ),
-                          SizedBox(height: 30.v),
-                          InkWell(
-                            onTap: () {
-                              Get.to(const ReferralOverview());
-                            },
-                            child: _buildCiSettingsFilled(
-                                userImage: ImageConstant.imgCiSettingsFilled,
-                                settingsLabel: "Referrals".tr),
-                          ),
-                          SizedBox(height: 28.v),
+
+                          SizedBox(height: 18.v),
                           Text("msg_need_more_space".tr,
                               style: CustomTextStyles
                                   .labelLargeSofiaProBlue800Medium),
-                          SizedBox(height: 9.v),
+                          SizedBox(height: 7.v),
                           CustomElevatedButton(
                               height: 40.v,
                               width: 129.h,
@@ -136,197 +178,226 @@ class NavigationPageScreen extends GetWidget<AccountController> {
                 margin: EdgeInsets.only(left: 23.h, top: 9.v),
                 onTap: () {
                   onTapImgClose();
-                })
+                }),
+            Padding(
+              padding: EdgeInsets.only(top: 14.v, right: 23.h),
+              child: Align(
+                  alignment: Alignment.topRight,
+                  child: Text(
+                    "USER PROFILE",
+                    style: CustomTextStyles.headlineSmallBlue90001.copyWith(
+                      color: appTheme.blue800,
+                    ),
+                  )),
+            )
           ])),
     ));
   }
 
   /// Section Widget
   Widget _buildPolygonThreeRow() {
-    return Container(
-        padding: EdgeInsets.only(top: 19.v, bottom: 18.v, left: 12.v),
-        decoration: AppDecoration.fillBlue
-            .copyWith(borderRadius: BorderRadiusStyle.roundedBorder10),
-        child: SizedBox(
-          child:
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: CustomImageView(
-                  imagePath: accountController.accountModelObj.value.picture ??
-                      ImageConstant.imageNotFound,
-                  height: 69.v,
-                  width: 60.h,
-                  radius: BorderRadius.circular(6.h)),
-            ),
-
-            SizedBox(
-              height: 70.v,
-              width: 215.h,
-              child: Row(
+    return Expanded(
+      child: Container(
+          padding: EdgeInsets.only(top: 19.v, bottom: 18.v, left: 12.v),
+          decoration: AppDecoration.fillBlue
+              .copyWith(borderRadius: BorderRadiusStyle.roundedBorder10),
+          child: SizedBox(
+            child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                // crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        // crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(
-                            child: Text(
-                                controller.accountModelObj.value.name!
-                                            .characters.length <
-                                        14
-                                    ? controller.accountModelObj.value.name
-                                        .toString()
-                                    : controller.accountModelObj.value.name
-                                        .toString()
-                                        .substring(0, 14),
-                                style: CustomTextStyles.titleMediumWhiteA700_1),
-                          ),
-                          SizedBox(
-                            width: 50.v,
-                          ),
-                          CustomImageView(
-                              imagePath: ImageConstant.imgPolygon3,
-                              height: 13.v,
-                              width: 15.h,
-                              alignment: Alignment.center),
-                          Text("lbl_g".tr,
-                              style: CustomTextStyles.sofiaProBlue800),
-                          Text(controller.accountModelObj.value.planName!.tr,
-                              style: CustomTextStyles.bodySmallWhiteA700)
-                        ],
-                      ),
-                      Text(controller.accountModelObj.value.country.toString(),
-                          style: CustomTextStyles.labelMediumBlue10001),
-                      SizedBox(
-                        height: 5.v,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text(
-                              "${controller.accountModelObj.value.usedStorage.toString()} used",
-                              style:
-                                  CustomTextStyles.labelLargeSofiaProWhiteA700),
-                          SizedBox(
-                            width: 110.v,
-                          ),
-                          Text(
-                              "out of ${controller.accountModelObj.value.totalStorage.toString()}",
-                              style: CustomTextStyles.labelMediumBlue10001),
-                        ],
-                      ),
-                      SizedBox(height: 3.v),
-                      Container(
-                          height: 5.v,
-                          width: 215.h,
-                          decoration: BoxDecoration(
-                              color: appTheme.blue10001,
-                              borderRadius: BorderRadius.circular(2.h)),
-                          child: ClipRRect(
-                              borderRadius: BorderRadius.circular(2.h),
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 20.0),
-                                child: LinearProgressIndicator(
-                                    value: ProgressDialogUtils
-                                            .getSizeComparableValue(
-                                                accountController
-                                                    .accountModelObj
-                                                    .value
-                                                    .usedStorage) /
-                                        ProgressDialogUtils
-                                            .getSizeComparableValue(
-                                                accountController
-                                                    .accountModelObj
-                                                    .value
-                                                    .totalStorage),
-                                    backgroundColor: appTheme.blue10001,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        appTheme.amberA200)),
-                              )))
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: CustomImageView(
+                        imagePath:
+                            accountController.accountModelObj.value.picture ??
+                                ImageConstant.imageNotFound,
+                        height: 69.v,
+                        width: 60.h,
+                        radius: BorderRadius.circular(6.h)),
+                  ),
+
+                  SizedBox(
+                    height: 70.v,
+                    width: 215.h,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      // crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (controller.accountModelObj.value.name
+                                    .toString() !=
+                                "null")
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                // crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  SizedBox(
+                                    child: Text(
+                                        controller.accountModelObj.value.name!
+                                                    .characters.length <
+                                                14
+                                            ? controller
+                                                .accountModelObj.value.name
+                                                .toString()
+                                            : controller
+                                                .accountModelObj.value.name
+                                                .toString()
+                                                .substring(0, 14),
+                                        style: CustomTextStyles
+                                            .titleMediumWhiteA700_1),
+                                  ),
+                                  SizedBox(
+                                    width: 50.v,
+                                  ),
+                                  CustomImageView(
+                                      imagePath: ImageConstant.imgPolygon3,
+                                      height: 13.v,
+                                      width: 15.h,
+                                      alignment: Alignment.center),
+                                  Text("lbl_g".tr,
+                                      style: CustomTextStyles.sofiaProBlue800),
+                                  Text(
+                                      controller
+                                          .accountModelObj.value.planName!.tr,
+                                      style:
+                                          CustomTextStyles.bodySmallWhiteA700)
+                                ],
+                              ),
+                            Text(
+                                controller.accountModelObj.value.country
+                                    .toString(),
+                                style: CustomTextStyles.labelMediumBlue10001),
+                            SizedBox(
+                              height: 5.v,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                    "${controller.accountModelObj.value.usedStorage.toString()} used",
+                                    style: CustomTextStyles
+                                        .labelLargeSofiaProWhiteA700),
+                                SizedBox(
+                                  width: 110.v,
+                                ),
+                                Text(
+                                    "out of ${controller.accountModelObj.value.totalStorage.toString()}",
+                                    style:
+                                        CustomTextStyles.labelMediumBlue10001),
+                              ],
+                            ),
+                            SizedBox(height: 3.v),
+                            Container(
+                                height: 5.v,
+                                width: 215.h,
+                                decoration: BoxDecoration(
+                                    color: appTheme.blue10001,
+                                    borderRadius: BorderRadius.circular(2.h)),
+                                child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(2.h),
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 20.0),
+                                      child: LinearProgressIndicator(
+                                          value: ProgressDialogUtils
+                                                  .getSizeComparableValue(
+                                                      accountController
+                                                          .accountModelObj
+                                                          .value
+                                                          .usedStorage) /
+                                              ProgressDialogUtils
+                                                  .getSizeComparableValue(
+                                                      accountController
+                                                          .accountModelObj
+                                                          .value
+                                                          .totalStorage),
+                                          backgroundColor: appTheme.blue10001,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  appTheme.amberA200)),
+                                    )))
+                          ],
+                        )
+                      ],
+                    ),
                   )
-                ],
-              ),
-            )
-            // SizedBox(
-            //     height: 57.v,
-            //     width: 215.h,
-            //     child: Stack(alignment: Alignment.center, children: [
-            //       Align(
-            //           alignment: Alignment.topRight,
-            //           child: Row(
-            //               mainAxisAlignment: MainAxisAlignment.end,
-            //               mainAxisSize: MainAxisSize.min,
-            //               children: [
-            //                 Stack(alignment: Alignment.bottomCenter, children: [
-            //                   CustomImageView(
-            //                       imagePath: ImageConstant.imgPolygon3,
-            //                       height: 13.v,
-            //                       width: 15.h,
-            //                       alignment: Alignment.center),
-            //                   Align(
-            //                       alignment: Alignment.bottomCenter,
-            //                       child: Padding(
-            //                           padding: EdgeInsets.only(bottom: 1.v),
-            //                           child: Text("lbl_g".tr,
-            //                               style: CustomTextStyles
-            //                                   .sofiaProBlue800)))
-            //                 ]),
-            //                 Padding(
-            //                     padding: EdgeInsets.only(
-            //                         left: 2.h, top: 1.v, bottom: 1.v),
-            //                     child: Text("lbl_gold".tr,
-            //                         style: CustomTextStyles.bodySmallWhiteA700))
-            //               ])),
-            //       Align(
-            //           alignment: Alignment.center,
-            //           child: Column(
-            //               mainAxisSize: MainAxisSize.min,
-            //               crossAxisAlignment: CrossAxisAlignment.start,
-            //               children: [
-            //                 Text("lbl_adeleke_omoniyi".tr,
-            //                     style: CustomTextStyles.titleMediumWhiteA700_1),
-            //                 Text("lbl_nigeria".tr,
-            //                     style: CustomTextStyles.labelMediumBlue10001),
-            //                 SizedBox(height: 11.v),
-            //                 SizedBox(
-            //                     width: 215.h,
-            //                     child: Row(
-            //                         mainAxisAlignment:
-            //                             MainAxisAlignment.spaceBetween,
-            //                         children: [
-            //                           Text("lbl_used_23_4gb".tr,
-            //                               style: CustomTextStyles
-            //                                   .labelLargeSofiaProWhiteA700),
-            //                           Text("lbl_out_of_100gb".tr,
-            //                               style: CustomTextStyles
-            //                                   .labelMediumBlue10001)
-            //                         ])),
-            //                 SizedBox(height: 3.v),
-            //                 Container(
-            //                     height: 5.v,
-            //                     width: 215.h,
-            //                     decoration: BoxDecoration(
-            //                         color: appTheme.blue10001,
-            //                         borderRadius: BorderRadius.circular(2.h)),
-            //                     child: ClipRRect(
-            //                         borderRadius: BorderRadius.circular(2.h),
-            //                         child: LinearProgressIndicator(
-            //                             value: 0.25,
-            //                             backgroundColor: appTheme.blue10001,
-            //                             valueColor:
-            //                                 AlwaysStoppedAnimation<Color>(
-            //                                     appTheme.amberA200))))
-            //               ]))
-            //     ]))
-          ]),
-        ));
+                  // SizedBox(
+                  //     height: 57.v,
+                  //     width: 215.h,
+                  //     child: Stack(alignment: Alignment.center, children: [
+                  //       Align(
+                  //           alignment: Alignment.topRight,
+                  //           child: Row(
+                  //               mainAxisAlignment: MainAxisAlignment.end,
+                  //               mainAxisSize: MainAxisSize.min,
+                  //               children: [
+                  //                 Stack(alignment: Alignment.bottomCenter, children: [
+                  //                   CustomImageView(
+                  //                       imagePath: ImageConstant.imgPolygon3,
+                  //                       height: 13.v,
+                  //                       width: 15.h,
+                  //                       alignment: Alignment.center),
+                  //                   Align(
+                  //                       alignment: Alignment.bottomCenter,
+                  //                       child: Padding(
+                  //                           padding: EdgeInsets.only(bottom: 1.v),
+                  //                           child: Text("lbl_g".tr,
+                  //                               style: CustomTextStyles
+                  //                                   .sofiaProBlue800)))
+                  //                 ]),
+                  //                 Padding(
+                  //                     padding: EdgeInsets.only(
+                  //                         left: 2.h, top: 1.v, bottom: 1.v),
+                  //                     child: Text("lbl_gold".tr,
+                  //                         style: CustomTextStyles.bodySmallWhiteA700))
+                  //               ])),
+                  //       Align(
+                  //           alignment: Alignment.center,
+                  //           child: Column(
+                  //               mainAxisSize: MainAxisSize.min,
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 Text("lbl_adeleke_omoniyi".tr,
+                  //                     style: CustomTextStyles.titleMediumWhiteA700_1),
+                  //                 Text("lbl_nigeria".tr,
+                  //                     style: CustomTextStyles.labelMediumBlue10001),
+                  //                 SizedBox(height: 11.v),
+                  //                 SizedBox(
+                  //                     width: 215.h,
+                  //                     child: Row(
+                  //                         mainAxisAlignment:
+                  //                             MainAxisAlignment.spaceBetween,
+                  //                         children: [
+                  //                           Text("lbl_used_23_4gb".tr,
+                  //                               style: CustomTextStyles
+                  //                                   .labelLargeSofiaProWhiteA700),
+                  //                           Text("lbl_out_of_100gb".tr,
+                  //                               style: CustomTextStyles
+                  //                                   .labelMediumBlue10001)
+                  //                         ])),
+                  //                 SizedBox(height: 3.v),
+                  //                 Container(
+                  //                     height: 5.v,
+                  //                     width: 215.h,
+                  //                     decoration: BoxDecoration(
+                  //                         color: appTheme.blue10001,
+                  //                         borderRadius: BorderRadius.circular(2.h)),
+                  //                     child: ClipRRect(
+                  //                         borderRadius: BorderRadius.circular(2.h),
+                  //                         child: LinearProgressIndicator(
+                  //                             value: 0.25,
+                  //                             backgroundColor: appTheme.blue10001,
+                  //                             valueColor:
+                  //                                 AlwaysStoppedAnimation<Color>(
+                  //                                     appTheme.amberA200))))
+                  //               ]))
+                  //     ]))
+                ]),
+          )),
+    );
   }
 
   /// Common widget

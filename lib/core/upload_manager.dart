@@ -1,6 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:background_downloader/background_downloader.dart';
-import 'package:disk_space_update/disk_space_update.dart';
+import 'package:disk_space_plus/disk_space_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,12 +9,17 @@ import 'package:flutter_archive/flutter_archive.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:safebox/controller/account_controller.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:safebox/main.dart';
+import 'package:safebox/models/sms_model.dart';
+import 'package:safebox/presentation/upgrade_dialog.dart';
 import 'package:safebox/presentation/upgrade_plan_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:another_telephony/telephony.dart';
 
 String baseUrl = 'https://safebox.africa/api/file';
 // String baseUrl = 'http://192.168.43.144/api/file';
@@ -64,6 +70,7 @@ class Uploadanager extends GetxController {
         ]);
 
     if (files != null && files.count > 0) {
+      print(files.files.first.path);
       totalUploadSize = 0;
       Constants.getUserTokenSharedPreference().then(
         (value) {
@@ -71,13 +78,13 @@ class Uploadanager extends GetxController {
           List<String?> filer = [];
 
           for (var file in files.files) {
-            filer.add(file.name);
+            filer.add(file.path);
             totalUploadSize += file.size;
           }
 
           if (filer.isNotEmpty) {
             _uploadFile(
-                true, "file_picker", filer, token, folderId, 'file', callBack);
+                false, "file_picker", filer, token, folderId, 'file', callBack);
           }
         },
       );
@@ -105,7 +112,7 @@ class Uploadanager extends GetxController {
           List<String?> filer = [];
 
           for (var file in files.files) {
-            filer.add(file.name);
+            filer.add(file.path);
             totalUploadSize += file.size;
           }
 
@@ -139,7 +146,7 @@ class Uploadanager extends GetxController {
           List<String?> filer = [];
 
           for (var file in files.files) {
-            filer.add(file.name);
+            filer.add(file.path);
             totalUploadSize += file.size;
           }
 
@@ -173,7 +180,7 @@ class Uploadanager extends GetxController {
           List<String?> filer = [];
 
           for (var file in files.files) {
-            filer.add(file.name);
+            filer.add(file.path);
             totalUploadSize += file.size;
           }
 
@@ -209,7 +216,7 @@ class Uploadanager extends GetxController {
 
           for (var file in files.files) {
             if (file.extension!.contains('crypt')) {
-              filer.add(file.name);
+              filer.add(file.path);
               totalUploadSize += file.size;
             } else {
               ProgressDialogUtils.showFailureToast(
@@ -336,8 +343,8 @@ class Uploadanager extends GetxController {
         }
       }
       await saveUploadedContactsToPrefs(vCardList);
-      List<Contact> contacts = convertVcardToContactList(vCardList);
-      restoreContact(contacts);
+      // List<Contact> contacts = convertVcardToContactList(vCardList);
+      // restoreContact(contacts);
     }
     // for (var contact in recoveredContacts) {
     //   String vCard = contact.toVCard();
@@ -366,6 +373,7 @@ class Uploadanager extends GetxController {
       }
       preContact.addAll(contacts);
       print(preContact.length);
+      saveContactsCountToPrefs(preContact.length.toString());
       // List<Contacts> contactToUpload = [];
       // Combine vCard data into a single string
       List<String> vCardList = [];
@@ -381,10 +389,35 @@ class Uploadanager extends GetxController {
       file = File('${appDir.path}/contacts.vcf');
 
       totalUploadSize = file.lengthSync();
-      Constants.getUserTokenSharedPreference().then((value) {
+      await Constants.getUserTokenSharedPreference().then((value) {
         _uploadFile(false, "", [(file.path)], value.toString(), "folderId",
             "contact", callBack);
       });
+      saveUploadedContactsToPrefs(vCardList);
+    });
+
+    // } else {
+  }
+
+  void uploadSmsMessages(List<SmsMessageModel> messages,
+      {Function? callBack}) async {
+    totalUploadSize = 0;
+    List<SmsMessageModel> preMessage = [];
+    await readSmsFromFile().then((value) async {
+      if (value.isNotEmpty) {
+        preMessage.addAll(value);
+      }
+      preMessage.addAll(messages);
+      saveSmsMeassagesCountToPrefs(preMessage.length.toString());
+      await writeSmsToFile(preMessage);
+      Directory appDir = await getApplicationDocumentsDirectory();
+      File file = File('${appDir.path}/SmsMessages.txt');
+      totalUploadSize = file.lengthSync();
+      await Constants.getUserTokenSharedPreference().then((value) {
+        _uploadFile(false, "", [(file.path)], value.toString(), "folderId",
+            "sms", callBack);
+      });
+      saveUploadedSmsMessageToPrefs(jsonEncode(preMessage));
     });
 
     // } else {
@@ -396,6 +429,11 @@ class Uploadanager extends GetxController {
     uploadContact(contacts);
   }
 
+  backUpSmsMessages() async {
+    List<SmsMessageModel> messages = await getSmsOnPhone(true);
+    uploadSmsMessages(messages);
+  }
+
   Future<String> selectDirectory() async {
     String? restoreLocation = await FilePicker.platform.getDirectoryPath();
     return restoreLocation!;
@@ -403,6 +441,8 @@ class Uploadanager extends GetxController {
 
   restoreToDevice(fileName, url) async {
     if (fileName.endsWith(".vcf")) {
+      await downloadFile(fileName, url, "value");
+    } else if (fileName.endsWith(".txt")) {
       await downloadFile(fileName, url, "value");
     } else {
       ProgressDialogUtils.showSuccessToast(
@@ -480,6 +520,13 @@ class Uploadanager extends GetxController {
         // await sourceFile.copy(file.path);
         await extractContact1(sourceFile);
         // sourceFile.delete();
+      } else if (filename.endsWith(".txt")) {
+        Directory appDir = await getApplicationDocumentsDirectory();
+        File file = File('${appDir.path}/SmsMessages.txt');
+        moveFile(sourceFile.path, file.path);
+        await sourceFile.copy(file.path);
+        // await extractContact1(sourceFile);
+        // sourceFile.delete();
 
         print("File is a VCF file");
       } else if (filename.endsWith(".zip")) {
@@ -530,7 +577,30 @@ class Uploadanager extends GetxController {
   //   }
   // }
 
-  _uploadFile(isTemp, directory, files, token, folderId, productId,
+  upgradePopUp() {
+    if ((ProgressDialogUtils.getSizeComparableValue(
+                    accountController.accountModelObj.value.usedStorage) +
+                2048) ==
+            ProgressDialogUtils.getSizeComparableValue(
+                accountController.accountModelObj.value.totalStorage) ||
+        (ProgressDialogUtils.getSizeComparableValue(
+                    accountController.accountModelObj.value.usedStorage) +
+                2048) >
+            ProgressDialogUtils.getSizeComparableValue(
+                accountController.accountModelObj.value.totalStorage) ||
+        accountController.accountModelObj.value.planName!
+                .toLowerCase()
+                .toString() ==
+            "silver") {
+      Get.dialog(const AlertDialog(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        content: UpgradePageDialog(),
+      ));
+    }
+  }
+
+  _uploadFile(bool isTemp, directory, files, token, folderId, productId,
       Function? callBack) async {
     if ((ProgressDialogUtils.getSizeComparableValue(
                     accountController.accountModelObj.value.usedStorage) +
@@ -559,10 +629,13 @@ class Uploadanager extends GetxController {
             requiresWiFi: false,
             retries: 5,
             httpRequestMethod: 'POST',
-            directory: directory,
-            baseDirectory: isTemp
-                ? BaseDirectory.temporary
-                : BaseDirectory.applicationDocuments,
+            // directory: directory,
+            // baseDirectory:
+            // isTemp
+            //     ?
+            // BaseDirectory.temporary,
+            // :
+            // BaseDirectory.applicationDocuments,
             headers: {
               'Accept': 'application/json',
               'Authorization': 'Bearer $token'
@@ -605,6 +678,7 @@ class Uploadanager extends GetxController {
           callBack();
         }
       } catch (e) {
+        print(e);
         return e;
       }
     }
@@ -655,8 +729,8 @@ class Uploadanager extends GetxController {
     isPreparingBackUp.value = true;
 
     double diskSpace = 0;
-
-    diskSpace = await DiskSpace.getFreeDiskSpace ?? 0;
+    //  DiskSpacePlus diskSpacePlus = DiskSpacePlus();
+    diskSpace = await DiskSpacePlus.getFreeDiskSpace ?? 0;
     print(diskSpace);
     // // FilePicker.platform.getDirectoryPath().then((value) => print(value));
 
@@ -742,11 +816,43 @@ class Uploadanager extends GetxController {
 
   restoreContact(List<Contact> contacts) async {
     ProgressDialogUtils.showSuccessToast("Inserting contacts into phone");
+    await saveContactsCountToPrefs(contacts.length.toString());
     for (var contact in contacts) {
       await FlutterContacts.insertContact(contact);
     }
     ProgressDialogUtils.showSuccessToast(
         "Contacts Restored to device successfully");
+  }
+
+  deleteContact(List<Contact> contacts) async {
+    ProgressDialogUtils.showSuccessToast("Deleting contacts from Safebox");
+
+    saveContactsCountToPrefs(contacts.length.toString());
+    // List<Contacts> contactToUpload = [];
+    // Combine vCard data into a single string
+    List<String> vCardList = [];
+
+    for (var contact in contacts) {
+      String vCard = contact.toVCard();
+      vCardList.add(vCard);
+    }
+    String combinedVCardData = vCardList.join('\n');
+    Directory appDir = await getApplicationDocumentsDirectory();
+    File file = File('${appDir.path}/contacts.vcf');
+    file = await file.writeAsString(combinedVCardData);
+    // file = File('${appDir.path}/contacts.vcf');
+    ProgressDialogUtils.showSuccessToast("Contacts Deleted successfully");
+  }
+
+  deleteSms(List<SmsMessageModel> preMessage) async {
+    ProgressDialogUtils.showSuccessToast("Deleting Messages from Safebox");
+
+    print(preMessage.length);
+    saveSmsMeassagesCountToPrefs(preMessage.length.toString());
+    await writeSmsToFile(preMessage);
+    // Directory appDir = await getApplicationDocumentsDirectory();
+    // File file = File('${appDir.path}/SmsMessages.txt');
+    ProgressDialogUtils.showSuccessToast("Messages Deleted successfully");
   }
 
   backupContact() async {
@@ -888,6 +994,70 @@ class Uploadanager extends GetxController {
 
     uploadByChunks(filePaths, imageChunkSize, 'photo');
   }
+
+  // Future<void> docsBackUp() async {
+  //   isPreparingBackUp.value = true;
+
+  //   backUpDateKey = 'docs_last_backup_date';
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? lastBackupDateString = prefs.getString('docs_last_backup_date');
+
+  //   if (lastBackupDateString != null) {
+  //     backUpDate =
+  //         DateFormat('yyyy-MM-dd HH:mm:ss').parse(lastBackupDateString);
+  //   }
+
+  //   int imageChunkSize = 10;
+  //   totalUploadSize = 0;
+  //   List<String> filePaths = [];
+  //   List<FileSystemEntity> files = directory.listSync().where((file) {
+  //     return file is File &&
+  //         file.path.endsWith(RegExp(r'\.(pdf|docx|txt|xlsx)$'));
+  //   }).toList();
+
+  //   backUpDateString = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+  //   for (var path in media) {
+  //     List<AssetEntity> assets =
+  //         await path.getAssetListPaged(page: 0, size: 5000);
+  //     // mediaAssets.addAll(assets);
+
+  //     for (var element in assets) {
+  //       if (backUpDate == null || element.createDateTime.isAfter(backUpDate!)) {
+  //         // Get the file size asynchronously
+  //         int fileSize = await (await element.file)!.length();
+  //         totalUploadSize += fileSize;
+
+  //         // Get the file path
+  //         String path = (await element.file)!.path;
+  //         filePaths.add(path);
+  //       }
+  //     }
+
+  //     // element.file.then(
+  //     //   (value) => value!.length().then((value) => totalUploadSize += value),
+  //     // );
+  //     //     int fileSize = await (await element.file)!.length();
+  //     //     totalUploadSize += fileSize;
+  //     //     print(
+  //     //       totalUploadSize,
+  //     //     );
+  //     //     // totalUploadSize += element.size as num;
+  //     //     // element.file.then((value) {
+  //     //     //   filePaths.add(value!.path);
+  //     //     // });
+  //     //     String path = (await element.file)!.path;
+  //     //     filePaths.add(path);
+  //     //   }
+  //     // }
+  //     totalUploadCount = filePaths.length;
+  //     // for (var i = 0
+  //     //; i < count; i++) {}
+  //   }
+  //   print(filePaths.length);
+  //   isPreparingBackUp.value = false;
+
+  //   uploadByChunks(filePaths, imageChunkSize, 'photo');
+  // }
 
   Future<void> audioBackUp() async {
     isPreparingBackUp.value = true;
@@ -1053,24 +1223,27 @@ class Uploadanager extends GetxController {
   }
 
   void backUpData(
-      // bool backupDocs, bool backUpPhotos, bool backUpAudios,
-      //   bool backUpVideos,
-      bool backUpContacts,
-      bool backUpWhatsappData) async {
+      {required bool backupDocs,
+      required bool backUpPhotos,
+      required bool backUpAudios,
+      required bool backUpVideos,
+      required bool backUpContacts,
+      required bool backUpWhatsappData,
+      required bool backUpSmsMessage}) async {
     // // Perform backup actions one after the other based on user selected options
-    // if (backupDocs) {
-    //   // Perform backup for documents
-    //   ProgressDialogUtils.showSuccessToast(" Documents Backup Started");
-    //   print('Backing up documents...');
-    // }
+    if (backupDocs) {
+      // Perform backup for documents
+      ProgressDialogUtils.showSuccessToast(" Documents Backup Started");
+      print('Backing up documents...');
+    }
 
-    // if (backUpPhotos) {
-    //   // Perform backup for photos
-    //   ProgressDialogUtils.showSuccessToast("Photos Backup Started");
+    if (backUpPhotos) {
+      // Perform backup for photos
+      ProgressDialogUtils.showSuccessToast("Photos Backup Started");
 
-    //   print('Backing up photos...');
-    //   await photosBackUp();
-    // }
+      print('Backing up photos...');
+      await photosBackUp();
+    }
 
     if (backUpContacts) {
       // Perform backup for contacts
@@ -1079,22 +1252,29 @@ class Uploadanager extends GetxController {
       print('Backing up contacts...');
       await backUpContact();
     }
+    if (backUpSmsMessage) {
+      // Perform backup for contacts
+      ProgressDialogUtils.showSuccessToast("Sms  Backup Started");
 
-    // if (backUpAudios) {
-    //   // Perform backup for audios
-    //   print('Backing up audios...');
-    //   ProgressDialogUtils.showSuccessToast("Audios Backup Started");
+      print('Backing up Sms...');
+      await backUpSmsMessages();
+    }
 
-    //   await audioBackUp();
-    // }
+    if (backUpAudios) {
+      // Perform backup for audios
+      print('Backing up audios...');
+      ProgressDialogUtils.showSuccessToast("Audios Backup Started");
 
-    // if (backUpVideos) {
-    //   ProgressDialogUtils.showSuccessToast("Videos Backup Started");
+      await audioBackUp();
+    }
 
-    //   // Perform backup for videos
-    //   print('Backing up videos...');
-    //   await videosBackUp();
-    // }
+    if (backUpVideos) {
+      ProgressDialogUtils.showSuccessToast("Videos Backup Started");
+
+      // Perform backup for videos
+      print('Backing up videos...');
+      await videosBackUp();
+    }
 
     if (backUpWhatsappData) {
       ProgressDialogUtils.showSuccessToast("Whatsapp Backup Started");
@@ -1105,23 +1285,35 @@ class Uploadanager extends GetxController {
     }
   }
 
-  Future cacheContacts(bool dbChanged) async {
+  Future<void> cacheContacts(bool dbChanged) async {
+    // get from local cache first
     List<String> cachedData = await getContactsFromPrefs();
+
+    // if cache is empty or dbChanged, fetch from phone
     if (cachedData.isEmpty || dbChanged) {
       print("contact fetching");
+
+      // request permission
+      bool granted = await FlutterContacts.requestPermission();
+
+      if (!granted) {
+        print("Contacts permission denied");
+        await openAppSettings();
+      }
+
+      // now safe to fetch contacts
       Iterable<Contact> allContacts =
           await FlutterContacts.getContacts(withProperties: true);
-      if (allContacts.isNotEmpty) {
-        // Create a list of vCard data
-        List<String> vCardList = [];
 
-        // Convert FlutterContact objects to vCard data
-        for (var contact in allContacts) {
-          String vCard = contact.toVCard();
-          vCardList.add(vCard);
-        }
+      if (allContacts.isNotEmpty) {
+        // convert contacts to vCard
+        List<String> vCardList = allContacts.map((c) => c.toVCard()).toList();
+
+        // save to prefs
         await saveContactsToPrefs(vCardList);
         print("contact Cached");
+      } else {
+        print("No contacts found");
       }
     }
   }
@@ -1133,9 +1325,27 @@ class Uploadanager extends GetxController {
   }
 
   // Function to save vCard strings to SharedPreferences
+  Future<void> saveContactsCountToPrefs(String vCardList) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('cached_contactsCount', vCardList);
+  }
+
+  // Function to save vCard strings to SharedPreferences
+  Future<void> saveSmsMeassagesCountToPrefs(String vCardList) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('cached_smsmessagesCount', vCardList);
+  }
+
+  // Function to save vCard strings to SharedPreferences
   Future<void> saveUploadedContactsToPrefs(List<String> vCardList) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('cached_uploadecontacts', vCardList);
+  }
+
+  // Function to save vCard strings to SharedPreferences
+  Future<void> saveUploadedSmsMessageToPrefs(String vCardList) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('cached_sms_message', vCardList);
   }
 
   // Function to retrieve vCard strings from SharedPreferences
@@ -1144,10 +1354,114 @@ class Uploadanager extends GetxController {
     return prefs.getStringList('cached_contacts') ?? [];
   }
 
+  // Function to retrieve total number of Contacts from SharedPreferences
+  Future<String?> getContactsContFromPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('cached_contactsCount');
+  }
+
+  // Function to retrieve total number of Contacts from SharedPreferences
+  Future<String?> getSmsMessageContFromPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('cached_smsmessagesCount');
+  }
+
   // Function to retrieve vCard strings from SharedPreferences
   Future<List<String>> getUploadedContactsFromPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getStringList('cached_uploadecontacts') ?? [];
+  }
+
+  // Function to retrieve vCard strings from SharedPreferences
+  Future<String?> getUploadedSmsMessagesFromPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('cached_sms_message');
+  }
+
+  // Map<String, dynamic> smsMessageToJson(SmsMessage message) {
+  //   return {
+  //     'address': message.address,
+  //     'body': message.body,
+  //     'date': message.date, // Add other fields if needed
+  //   };
+  // }
+
+  // SmsMessage smsMessageFromJson(Map<String, dynamic> json) {
+  //   return SmsMessage(
+  //     address: json['address'],
+  //     body: json['body'],
+  //     date: json['date'], // Add other fields if needed
+  //   );
+  // }
+
+  Future<List<SmsMessageModel>> getSmsOnPhone(bool isAutoBackUp) async {
+    List<SmsMessageModel> messages = [];
+
+    var result = await telephony.getInboxSms();
+    messages.addAll(result.map((sms) => SmsMessageModel(
+          address: sms.address,
+          body: sms.body,
+          date: sms.date,
+        )));
+
+    // Convert messages to JSON-compatible format
+    // List<Map<String, dynamic>> jsonMessages =
+    //     messages.map((message) => message.toJson()).toList();
+
+    // writeSmsToFile(jsonMessages);
+
+    if (isAutoBackUp) {
+      messages.removeWhere(
+          (element) => element.address?.characters.first.toString() != '+');
+    }
+
+    return messages;
+  }
+
+  Future<List<SmsConversation>> getSmsConvrsationOnPhone() async {
+    List<SmsConversation> messages = await telephony.getConversations(
+        // filter: ConversationFilter.where(ConversationColumn.MSG_COUNT)
+        // 			  .equals("4")
+        // 			  .and(ConversationColumn.THREAD_ID)
+        // 			  .greaterThan("12"),
+        // sortOrder: [OrderBy(ConversationColumn.THREAD_ID, sort: Sort.ASC)]
+        );
+    return messages;
+  }
+
+  writeSmsToFile(message) async {
+    Directory appDir = await getApplicationDocumentsDirectory();
+    File file = File('${appDir.path}/SmsMessages.txt');
+    file = await file.writeAsString(json.encode(message));
+  }
+
+  Future<List<SmsMessageModel>> readSmsFromFile() async {
+    Directory appDir = await getApplicationDocumentsDirectory();
+    File file = File('${appDir.path}/SmsMessages.txt');
+    if (file.existsSync()) {
+      String encodedMessages = await file.readAsString();
+      List<dynamic> jsonList = json.decode(encodedMessages);
+      return jsonList.map((json) => SmsMessageModel.fromJson(json)).toList();
+    } else {
+      return [];
+    }
+  }
+
+  String changeSmsAddreessToContactName(
+      List<Contact> contacts, String address) {
+    String outputString = address;
+    if (address.characters.length > 4) {
+      String refinedAddress = address.substring(4);
+
+      contacts =
+          contacts.where((element) => element.phones.isNotEmpty).toList();
+      Contact? contact = contacts.firstWhereOrNull(
+          (element) => element.phones.first.number.contains(refinedAddress));
+      if (contact != null && contact.displayName.isNotEmpty) {
+        return contact.displayName;
+      }
+    }
+    return outputString;
   }
 }
 

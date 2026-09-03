@@ -4,7 +4,6 @@ import '../core/app_export.dart';
 /// A collection of pre-defined text styles for customizing text appearance,
 /// categorized by different font families and weights.
 /// Additionally, this class includes extensions on [TextStyle] to easily apply specific font families to text.
-
 class CustomTextStyles {
   // Body text style
   static get bodyLargeOnPrimaryContainer => theme.textTheme.bodyLarge!.copyWith(
@@ -44,6 +43,11 @@ class CustomTextStyles {
       theme.textTheme.bodyLarge!.sFProText.copyWith(
         color: appTheme.black900,
       );
+  static get bodyLargeSFProTextBlack400 =>
+      theme.textTheme.bodyLarge!.sFProText.copyWith(
+          color: appTheme.black900,
+          fontSize: 13.fSize,
+          fontWeight: FontWeight.w400);
   static get bodyLargeSFProTextWhiteA700 =>
       theme.textTheme.bodyLarge!.sFProText.copyWith(
         color: appTheme.whiteA700,
@@ -227,6 +231,12 @@ class CustomTextStyles {
       theme.textTheme.titleLarge!.sofiaPro.copyWith(
         color: appTheme.indigo900,
         fontSize: 22.fSize,
+        fontWeight: FontWeight.w600,
+      );
+  static get titleLargeSofiaProIndigo600 =>
+      theme.textTheme.titleLarge!.sofiaPro.copyWith(
+        color: appTheme.indigo900,
+        fontSize: 14.fSize,
         fontWeight: FontWeight.w600,
       );
   static get titleLargeSofiaProOnPrimary =>

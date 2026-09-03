@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:safebox/controller/starred_folder_controller.dart';
 import 'package:safebox/core/app_export.dart';
 import 'package:safebox/presentation/upgrade_storage_screen.dart';
 import 'package:safebox/widgets/custom_elevated_button.dart';
-import 'package:safebox/widgets/custom_text_form_field.dart';
 
 // ignore: must_be_immutable
 class UpgradePlanDialog extends StatelessWidget {

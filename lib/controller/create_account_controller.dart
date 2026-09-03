@@ -1,6 +1,7 @@
 import 'package:safebox/controller/account_controller.dart';
 import 'package:safebox/core/apirepository_implementation.dart';
 import 'package:safebox/core/app_export.dart';
+import 'package:safebox/core/upload_manager.dart';
 import 'package:safebox/core/utils/progress_dialog_utils.dart';
 import 'package:safebox/domain/googleauth/google_auth_helper.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +19,11 @@ class CreateAccountController extends GetxController {
   //   apiKey: 'TL5lEKuMU1BWSJUsqivA4dN2RxVT5BZQ5aEu0ja76f7qX8zNdPBAhTLv40WV2Z',
   //   senderId: 'SAFEBOX AFRICA',
   // );
+  final Uploadanager _uploadManager = Get.put(Uploadanager());
+
   String termiiApiKey =
       'TL5lEKuMU1BWSJUsqivA4dN2RxVT5BZQ5aEu0ja76f7qX8zNdPBAhTLv40WV2Z';
-  String termiiSenderId = 'SafeBox';
+  String termiiSenderId = 'PVTAlert';
   final ApiRepositoryImplementation _apiRepositoryImplementation =
       Get.put(ApiRepositoryImplementation());
   final AccountController _accountController = Get.put(AccountController());
@@ -51,20 +54,31 @@ class CreateAccountController extends GetxController {
   }
 
   Future<String> sendPhoneVrificationCode(destination) async {
-    print(destination);
     ProgressDialogUtils.showProgressDialog();
+    // Fetch senderId from server
+    final senderIdResponse =
+        await _apiRepositoryImplementation.getTermiiSenderId();
+    if (senderIdResponse != null &&
+        senderIdResponse != 'error' &&
+        senderIdResponse['key'] != null) {
+      termiiSenderId = senderIdResponse['key'];
+    } else {
+      ProgressDialogUtils.hideProgressDialog();
+      ProgressDialogUtils.showFailureToast('Failed to get sender ID');
+      return '';
+    }
     var data = {
       'api_key': termiiApiKey,
       'message_type': 'ALPHANUMERIC',
       'to': destination,
       'from': termiiSenderId,
-      'channel': 'generic',
+      'channel': 'dnd',
       'pin_attempts': 3,
-      'pin_time_to_live': 1,
+      'pin_time_to_live': 30,
       'pin_length': 4,
-      "pin_placeholder": "<1234>",
+      "pin_placeholder": "<0123>",
       "message_text":
-          "Thanks for using Safebox. Your verification code is <1234>",
+          "Your Safebox confirmation code is <0123>. it expires in 30 minutes",
       'pin_type': 'NUMERIC'
     };
 
@@ -158,6 +172,10 @@ class CreateAccountController extends GetxController {
       } else if (value['message'] == 'Email already exist') {
         ProgressDialogUtils.hideProgressDialog();
         ProgressDialogUtils.showFailureToast('Email Already Exist');
+      } else if (value['message'] == 'invalid refferral code') {
+        ProgressDialogUtils.hideProgressDialog();
+        ProgressDialogUtils.showFailureToast(
+            'Incorrect Refferral code. please check your refferral code and try again');
       } else if (value['message'] == 'Phone number already exist') {
         ProgressDialogUtils.hideProgressDialog();
         ProgressDialogUtils.showFailureToast('Phone Number Already Exist');
@@ -179,13 +197,17 @@ class CreateAccountController extends GetxController {
     _apiRepositoryImplementation.postGoogleLogin(data).then((value) {
       if (value['message'] == 'you have successfully registered') {
         Constants.saveUserTokenSharedPreference(value['token']);
+        _uploadManager.saveContactsToPrefs(['']);
+
         _accountController.refreshProfile(true);
 
         ProgressDialogUtils.hideProgressDialog();
 
         isRegister
             ? Get.off(const GettingStartedScreen())
-            : Get.off(const HomePageScreen());
+            : Get.off(const HomePageScreen(
+                isFirstLogin: true,
+              ));
       } else {
         GoogleAuthHelper().googleSignOutProcess();
         ProgressDialogUtils.showFailureToast(value['message']);

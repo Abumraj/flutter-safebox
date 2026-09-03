@@ -25,16 +25,22 @@ class UserfilesItemModel {
 
   factory UserfilesItemModel.fromJson(Map<String, dynamic> json) =>
       UserfilesItemModel(
-        id: json["id"],
+        id: json["id"] is int ? json["id"] : int.tryParse(json["id"] ?? ''),
         name: json["name"],
         path: json["path"],
-        parentId: int.parse(json["parent_id"]),
-        isFolder: int.parse(json["is_folder"]),
+        parentId: json["parent_id"] is int
+            ? json["parent_id"]
+            : int.tryParse(json["parent_id"] ?? ''),
+        isFolder: json["is_folder"] is int
+            ? json["is_folder"]
+            : int.tryParse(json["is_folder"] ?? ''),
         mime: json["mime"],
         size: json["size"],
         isFavourite: json["is_favourite"],
         createdAt: json["created_at"],
-        updatedAt: DateTime.parse(json['updated_at']),
+        updatedAt: json['updated_at'] != null
+            ? DateTime.parse(json['updated_at'])
+            : null,
       );
 
   Map<String, dynamic> toJson() => {
